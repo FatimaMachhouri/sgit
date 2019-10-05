@@ -18,7 +18,7 @@ class Add {
 
     filePaths.map(file => {
       //Step 1 : We crypt the file content
-      val fileContent = Source.fromFile(file).getLines.mkString
+      val fileContent = Source.fromFile(file).mkString
       val cryptedContent = encryptThisString(fileContent)
 
       //Step 2 : We create the blob file with a crypted name based on the content
