@@ -23,7 +23,7 @@ class Init {
 
       val sgitFolder = new File(newPath).mkdir()
       folders.map(folder => new File(newPath + File.separator + folder).mkdir)
-      files.foreach(file => new File(newPath + File.separator + file).createNewFile())
+      files.map(file => new File(newPath + File.separator + file).createNewFile())
 
       val file = new File(newPath + File.separator + "HEAD")
       val bw = new BufferedWriter(new FileWriter(file))
