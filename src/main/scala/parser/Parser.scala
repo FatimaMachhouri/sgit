@@ -1,6 +1,6 @@
 package parser
 
-import command.Init
+import command.{Add, Init}
 import scopt.OParser
 
 object Parser extends App {
@@ -15,13 +15,17 @@ object Parser extends App {
         .text("Here : How to use sgit"),
       cmd("init")
         .action((_, c) => c.copy(mode = "init"))
-        .text(
-          "Creates a .sgit directory in the current directory"
-        )
+        .text("Creates a .sgit directory in the current directory.")
         .children(
           arg[String]("<path>")
             .optional()
             .action((x, c) => c.copy(path = x))
+        ),
+      cmd("add")
+        .action((_, c) => c.copy(mode = "add"))
+        .text("Stages the files.")
+        .children(
+
         )
     )
   }
@@ -34,6 +38,12 @@ object Parser extends App {
           val i = new Init()
           i.init()
         }
+
+        case "add" => {
+          val a = new Add()
+          a.add(args.toList)
+        }
+
         case _ => {
           "Other"
         }

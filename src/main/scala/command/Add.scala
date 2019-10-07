@@ -10,13 +10,13 @@ class Add {
 
   /**
    *
-   * @param repositoryPath String
    * @param filePaths List[String]
    *
-   * Creates a Blob File for each file of the list parameter in the repositoryPath/.sgit/Blobs with an encrypted name based on the SHA-1
+   * Creates a Blob File for each file of the list parameter in the currentPath with an encrypted name based on the SHA-1
    */
-  def add(repositoryPath: String, filePaths: List[String]): Unit = {
-    val pathBlobs = repositoryPath + File.separator + ".sgit/Blobs"
+  def add(filePaths: List[String]): Unit = {
+    val currentRepositoryPath = new File(".").getCanonicalPath
+    val pathBlobs = currentRepositoryPath + File.separator + ".sgit/Blobs"
 
     filePaths.map(file => {
       //Step 1 : We crypt the file content
