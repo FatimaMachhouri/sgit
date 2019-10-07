@@ -1,5 +1,7 @@
 package parser
 
+import java.io.File
+
 import command.{Add, Init}
 import scopt.OParser
 
@@ -25,8 +27,12 @@ object Parser extends App {
         .action((_, c) => c.copy(mode = "add"))
         .text("Stages the files.")
         .children(
-
-        )
+          arg[File]("<file>...")
+            .unbounded()
+            .required()
+            .action((x, c) => c.copy(files = c.files :+ x))
+            .text("File to add to the stage.")
+        ),
     )
   }
 
@@ -41,7 +47,7 @@ object Parser extends App {
 
         case "add" => {
           val a = new Add()
-          a.add(args.toList)
+          a.add(args.tail.toList)
         }
 
         case _ => {
