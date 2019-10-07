@@ -1,3 +1,5 @@
+import command.Init
+
 object Sandbox extends App {
   println("Fatima")
 

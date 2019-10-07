@@ -1,7 +1,9 @@
+package command
+
 import java.io.{BufferedWriter, File, FileWriter}
 import java.math.BigInteger
-import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
+import java.security.{MessageDigest, NoSuchAlgorithmException}
+
 import scala.io.Source
 
 class Add {
@@ -51,7 +53,7 @@ class Add {
     val no = new BigInteger(1, messageDigest)
     // Convert message digest into hex value
     var hashtext = no.toString(16)
-    // Add preceding 0s to make it 32 bit
+    // command.Add preceding 0s to make it 32 bit
     while ( {
       hashtext.length < 32
     }) hashtext = "0" + hashtext
