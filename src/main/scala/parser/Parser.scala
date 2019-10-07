@@ -1,32 +1,46 @@
-import command.{Add, Init}
+package parser
+
+import command.Init
+import scopt.OParser
 
 object Parser extends App {
 
-  parser(args)
-
-  def parser(args: Array[String]): Unit = {
-
-    args match {
-      //INIT
-      case Array("init", _) => {
-        println("hello")
-        init(args(1))
-      }
-
-      //ADD
-      case Array("add", _) => add(args(1), args.tail.toList)
-    }
-
-    def init(path: String): Unit = {
-      val i = new Init
-      i.init(path)
-    }
-
-    def add(path: String, listFiles: List[String]): Unit = {
-      val a = new Add
-      a.add(path, listFiles)
-    }
+  val builder = OParser.builder[Config]
+  val parser1 = {
+    import builder._
+    OParser.sequence(
+      programName("sgit"),
+      head("sgit", "1.0"),
+      help("help")
+        .text("Here : How to use sgit"),
+      cmd("init")
+        .action((_, c) => c.copy(mode = "init"))
+        .text(
+          "Creates a .sgit directory in the current directory"
+        )
+        .children(
+          arg[String]("<path>")
+            .optional()
+            .action((x, c) => c.copy(path = x))
+        )
+    )
   }
 
+  OParser.parse(parser1, args, Config()) match {
+    case Some(config) => {
+
+      config.mode match {
+        case "init" => {
+          val i = new Init()
+          i.init()
+        }
+        case _ => {
+          "Other"
+        }
+      }
+    }
+
+    case _ =>
+  }
 
 }
