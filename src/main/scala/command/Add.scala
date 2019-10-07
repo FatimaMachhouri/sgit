@@ -32,6 +32,11 @@ class Add {
       bw.write(fileContent)
       bw.close()
 
+      //Step 4 : We write in the stage file the arborescence created
+      val bws = new BufferedWriter(new FileWriter(currentRepositoryPath + File.separator + ".sgit" + File.separator + "STAGE", true))
+      bws.write(cryptedContent + " " + file)
+      bws.newLine();
+      bws.close()
     })
   }
 
