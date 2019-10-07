@@ -6,7 +6,7 @@ import java.security.{MessageDigest, NoSuchAlgorithmException}
 
 import scala.io.Source
 
-class Add {
+object Add {
 
   /**
    *

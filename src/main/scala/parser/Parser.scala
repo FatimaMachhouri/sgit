@@ -41,17 +41,15 @@ object Parser extends App {
 
       config.mode match {
         case "init" => {
-          val i = new Init()
-          i.init()
+          Init.init()
         }
 
         case "add" => {
-          val a = new Add()
-          a.add(args.tail.toList)
+          Add.add(args.tail.toList)
         }
 
         case _ => {
-          "Other"
+          "Not a sgit command"
         }
       }
     }

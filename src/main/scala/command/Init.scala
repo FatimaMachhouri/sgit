@@ -2,7 +2,7 @@ package command
 
 import java.io.{BufferedWriter, File, FileWriter}
 
-class Init {
+object Init {
 
   /*
     Returns a boolean

@@ -1,16 +1,14 @@
 package command
 
-class Commit {
+object Commit {
 
   /**
    *
-   * @param paths
-   * With a list of paths, creates the arborescence
+   * Creates the arborescence of the stage file
    */
-  def commit(paths: String): Unit = {
-  
+  def commit(): Unit = {
 
-  }
+}
 
 
 }
