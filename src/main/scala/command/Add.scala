@@ -10,7 +10,7 @@ object Add {
    *
    * @param filePaths List[String]
    *
-   * Creates a Blob File for each file of the list parameter in the currentPath with an encrypted name based on the SHA-1
+   * Creates a Blob File for each file of the list parameter in the currentPath/.sgit/Blobs with an encrypted name based on the SHA-1
    */
   def add(filePaths: List[String]): Unit = {
     val currentRepositoryPath = new File(".").getCanonicalPath
@@ -55,8 +55,8 @@ object Add {
   /**
    *
    * @param file
-   * @return
-   * Return true if the file is already is the stage else false
+   * @return boolean
+   * Return true if the file is already in the stage else false
    */
   private def alreadyStaged(file: String): Boolean = {
     val path = new File(".").getCanonicalPath + File.separator + ".sgit" + File.separator + "STAGE"
