@@ -15,25 +15,19 @@ object Commit {
     val arrayPaths = formatStageFile()
 
     def commitTailRec(parentTree: String, treeName: String, arrayPaths: Array[Array[String]]): List[Tree] = {
-      if (arrayPaths.length == 0) List()
+      if (arrayPaths.length==0) return Nil
       else {
-        //Step 1 : We create the tree with files and directories of the same level
-        val currentTree = createTree(parentTree, treeName, arrayPaths.map(path => path.head))
-
-        //Step 2 : We create a new arborescence by deleting all the txt
-        val newArborescence = arrayPaths.map(path => {
-          if (isATxtFile(path.head)) path.tail
-          else path
-        })
-
-        //Step 3 : We run the algorithm on each head of arrays. As we delete files .txt, there is only directories (trees)
-        return currentTree :: commitTailRec(currentTree.treeName, newArborescence)
+        if (isATxtFile(arrayPaths.head.head)) {
+          createTree(parentTree, treeName, Array(arrayPaths.head.head)) :: commitTailRec(parentTree, treeName, arrayPaths.tail)
+        }
+        else { //I'm a directory
+          val newArrayPaths = arrayPaths
+          createTree(parentTree, arrayPaths.head.head, Array(arrayPaths.head.tail(0))) :: commitTailRec(arrayPaths.head.head, arrayPaths.head.tail.head, newArrayPaths)
+        }
       }
 
     }
-
     val listTrees = commitTailRec("origin", "o", arrayPaths)
-
   }
 
 
