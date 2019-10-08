@@ -12,7 +12,8 @@ object Commit {
    * @return a list of Tree which corresponds to the arborescence of the stafe file
    */
   def commit(): List[Tree] = {
-    val arrayPaths = formatStageFile()
+    //val arrayPaths = formatStageFile()
+    val arrayPaths = Array("origin/hello/world/a.txt", "origin/hello/b.txt", "origin/c.txt", "origin/hello/d.txt")
 
     def createTreesPathTailRec(parentTree: String, treeName: String, arrayPaths: Array[String], listTrees: List[Tree]): List[Tree] = {
 
@@ -27,12 +28,12 @@ object Commit {
         val newListTrees = mergeListTrees(listTrees, currenTree)
 
         //Step 3 : We run the recursive algorithm on the next path, with the new list of trees
-        return createTreesPathTailRec(parentTree, treeName, arrayPaths.tail, newListTrees)
+        createTreesPathTailRec(parentTree, treeName, arrayPaths.tail, newListTrees)
       }
 
     }
 
-    createTreesPathTailRec("o", "origin", arrayPaths, List())
+    createTreesPathTailRec("None", "origin", arrayPaths, List())
   }
 
   /**
@@ -50,7 +51,7 @@ object Commit {
       }
     }
 
-    createTreePathTailRec("origin", "o", arrayPath)
+    createTreePathTailRec("None", "origin", arrayPath)
   }
 
 
@@ -77,7 +78,7 @@ object Commit {
         if (!found) mergeListTreesTailRec(listToMerge.head :: listTreeMerged, listToMerge.tail)
         else { //there is already a tree existing, so we merge
           val newListTreeMerged = listTreeMerged.map(tree => {
-            if (tree.treeName == currentTreeToAdd.treeName && tree.parentTree == currentTreeToAdd.parentTree) new Tree(tree.parentTree, tree.treeName, tree.listTrees ++ currentTreeToAdd.listTrees, tree.listBlobs ++ currentTreeToAdd.listBlobs)
+            if (tree.treeName == currentTreeToAdd.treeName && tree.parentTree == currentTreeToAdd.parentTree) new Tree(tree.parentTree, tree.treeName, (tree.listTrees ++ currentTreeToAdd.listTrees).distinct, (tree.listBlobs ++ currentTreeToAdd.listBlobs).distinct)
             else tree
           })
           mergeListTreesTailRec(newListTreeMerged, listToMerge.tail)
@@ -131,7 +132,7 @@ object Commit {
     val fileContentTab = fileContent.split("\n")
 
     //We keep only the path and we delete the blod id
-    fileContentTab.map(line => line.split(" ")(1))
+    Array("origin/") ++ fileContentTab.map(line => line.split(" ")(1))
   }
 
 }
