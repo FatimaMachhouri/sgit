@@ -1,7 +1,6 @@
 package parser
 
 import java.io.File
-
 import command.{Add, Init}
 import scopt.OParser
 

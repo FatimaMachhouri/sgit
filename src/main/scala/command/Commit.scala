@@ -12,8 +12,7 @@ object Commit {
    * @return a list of Tree which corresponds to the arborescence of the stafe file
    */
   def commit(): List[Tree] = {
-    //val arrayPaths = formatStageFile()
-    val arrayPaths = Array("origin/hello/world/a.txt", "origin/hello/b.txt", "origin/c.txt", "origin/hello/d.txt")
+    val arrayPaths = formatStageFile()
 
     def createTreesPathTailRec(parentTree: String, treeName: String, arrayPaths: Array[String], listTrees: List[Tree]): List[Tree] = {
 
