@@ -14,7 +14,7 @@ object Add {
    */
   def add(filePaths: List[String]): Unit = {
     val currentRepositoryPath = new File(".").getCanonicalPath
-    val pathBlobs = currentRepositoryPath + File.separator + ".sgit/Blobs"
+    val pathBlobs = currentRepositoryPath + File.separator + ".sgit" + File.separator + "Blobs"
 
     filePaths.map(file => {
       //Step 1 : We crypt the file content
