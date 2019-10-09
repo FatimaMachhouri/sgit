@@ -38,10 +38,10 @@ object Add {
       val newStageContent = {
         if (alreadyStaged(file)) {
           val stageContentWithoutFile = stageContent.split("\n").filter(!_.contains(file))
-          stageContentWithoutFile.mkString("\n") + "\n" + cryptedContent + " " + file
+          stageContentWithoutFile.mkString("\n") + "\n" + "Blob " + cryptedContent + " " + file
         }
-        else if (stageContent == "") cryptedContent + " " + file
-        else stageContent + "\n" + cryptedContent + " " + file
+        else if (stageContent == "") "Blob " + cryptedContent + " " + file
+        else stageContent + "\n" + "Blob " + cryptedContent + " " + file
       }
 
       //Step 6 : We write the content in the stage file
