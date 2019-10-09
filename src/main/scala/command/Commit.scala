@@ -1,12 +1,11 @@
 package command
 
 import java.io.File
-
 import entities.Tree
-
+import scala.annotation.tailrec
 import scala.io.Source
 
-object Commit3 {
+object Commit {
 
   /**
    *
@@ -20,6 +19,7 @@ object Commit3 {
     //We split in order to have each line of the stage in a box. A line has the form : Blob hash path
     val currentStage = stageContent.split("\n").toList
 
+    @tailrec
     def commitTailRec(currentStage: List[String]): List[String] = {
       if (areAllOriginChildren(currentStage)) {
         currentStage
@@ -49,6 +49,7 @@ object Commit3 {
     val tmpListPaths = listPaths.map(path => path.split(" ")(2))
 
     //We retrieve the length of the deepest tree(s)
+    @tailrec
     def deepestTreesLengthTailRec(listPaths: List[String], maxLength: Int): Int = {
       if (listPaths.isEmpty) maxLength
       else {
@@ -65,26 +66,25 @@ object Commit3 {
 
   private def merge(listPaths: List[String]): List[Tree] = {
 
+    @tailrec
     def mergeTailRec(listPaths: List[String], acc: List[Tree]): List[Tree] = {
       if (listPaths.isEmpty) acc
       else {
         val currentPath = listPaths.head
         val currentPathTab = currentPath.split(" ")(2).split("/")
-        val key = currentPathTab.dropRight(1).mkString("/")
-        val value = currentPath.split(" ")(0) + " " + currentPath.split(" ")(1) + " " + currentPathTab(currentPathTab.length-1)
+        val pathTree = currentPathTab.dropRight(1).mkString("/")
+        val contentTree = currentPath.split(" ")(0) + " " + currentPath.split(" ")(1) + " " + currentPathTab(currentPathTab.length-1)
 
-        val getSameCurrentPath = acc.filter(elem => elem.treePath == key)
+        val treeWithSamePath = acc.filter(elem => elem.treePath == pathTree)
 
-        if (getSameCurrentPath.isEmpty) mergeTailRec(listPaths.tail, Tree(key, List(value)) :: acc)
+        if (treeWithSamePath.isEmpty) mergeTailRec(listPaths.tail, Tree(pathTree, List(contentTree)) :: acc)
         else {
-          val oldValue = acc.filter(elem => elem.treePath == key).head.content
-          val newValue = value :: oldValue
-          val newAcc = acc.filter(elem => elem.treePath != key)
+          val oldContentTree = acc.filter(elem => elem.treePath == pathTree).head.content
+          val newContentTree = contentTree :: oldContentTree
+          val newAcc = acc.filter(elem => elem.treePath != pathTree)
 
-
-          mergeTailRec(listPaths.tail, Tree(key, newValue) :: newAcc)
+          mergeTailRec(listPaths.tail, Tree(pathTree, newContentTree) :: newAcc)
         }
-
       }
     }
 
