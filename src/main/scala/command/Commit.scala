@@ -4,6 +4,7 @@ import java.io.File
 import entities.Tree
 import scala.annotation.tailrec
 import scala.io.Source
+import utils.FileIO.createTrees
 
 object Commit {
 
@@ -29,18 +30,21 @@ object Commit {
         val deepest = deepestTrees(currentStage)
 
         //Step 2 :
-        val deepestTreesMerged = merge(deepest)
+        val deepestTreesMerged = merge(deepest.distinct)
 
         //Step 3 :
-        val create = createTrees(deepestTreesMerged)
+        val createdTrees = createTrees(deepestTreesMerged)
 
         //Step 4 :
-        //TODO
-        List()
+        val newStage1 = currentStage.diff(deepest)
+        val newStage = newStage1 ++ createdTrees
+
+        commitTailRec(newStage)
       }
     }
 
     commitTailRec(currentStage)
+    //le créer ici
   }
 
 
@@ -89,11 +93,6 @@ object Commit {
     }
 
     mergeTailRec(listPaths, List())
-  }
-
-
-  private def createTrees(listPaths: List[Tree]): List[String] = {
-    List()
   }
 
 
