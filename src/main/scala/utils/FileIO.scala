@@ -4,13 +4,62 @@ import java.io.{BufferedWriter, File, FileWriter}
 import java.nio.file.{Files, Paths}
 import java.text.SimpleDateFormat
 import java.util.Calendar
-
 import utils.Hash.encryptThisString
 import entities.Tree
-
 import scala.io.Source
 
+
 object FileIO {
+
+  /**
+   *
+   * @param path string
+   * @return a boolean
+   * Creates in the path parameter a file. Returns true if the file is created otherwise false.
+   */
+  def createFile(path: String): Boolean = {
+    val file = new File(path)
+    file.createNewFile()
+  }
+
+  /**
+   *
+   * @param path string
+   * @return a boolean
+   * Creates in the path parameter a directory. Returns true if the directory is created otherwise false.
+   */
+  def createDirectory(path: String): Boolean = {
+    val directory = new File(path)
+    directory.mkdir()
+  }
+
+  /**
+   *
+   * @param path
+   * @param content
+   * Writes in the path parameter file the content parameter
+   * Does nothing if the file doesn't exist
+   */
+  def writeInFile(path: String, content: String): Unit = {
+    val file = new File(path)
+
+    if (Files.exists(Paths.get(path))) {
+      val bw = new BufferedWriter(new FileWriter(file))
+      bw.write(content)
+      bw.close()
+    }
+  }
+
+  /**
+   *
+   * @param path
+   * @return a string
+   * Returns the content of the path file
+   */
+  def getContentFile(path: String): String = {
+    Source.fromFile(path).mkString
+  }
+
   def createTrees(listTrees: List[Tree]): List[String] = {
     //We get the path
     val currentRepositoryPath = new File(".").getCanonicalPath
