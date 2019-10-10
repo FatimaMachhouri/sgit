@@ -21,30 +21,43 @@ object Commit {
     val currentStage = stageContent.split("\n").toList
 
     @tailrec
-    def commitTailRec(currentStage: List[String]): List[String] = {
+    def commitTailRec(currentStage: List[String], originChildren: List[String]): List[String] = {
+      println("----------------------------------------")
+      println("currentStage : " + currentStage)
+      println("originChildren : " + originChildren)
       if (areAllOriginChildren(currentStage)) {
-        currentStage
+        originChildren
       }
       else {
+        //Step 0 : We accumulate all origin children ie paths with the following format => "folder" or "file.txt"
+        val accTab = currentStage.map(path => path.split(" "))
+        val tmpAcc = accTab.filter(path => path(2).split(File.separator).length == 1)
+        val acc = tmpAcc.map(elem => elem.mkString(" ") + " ")
+
+        val currentStageTmp = currentStage.diff(acc)
+
         //Step 1 :
-        val deepest = deepestTrees(currentStage)
+        val deepest = deepestTrees(currentStageTmp)
+        println("deepest : " + deepest)
 
         //Step 2 :
         val deepestTreesMerged = merge(deepest.distinct)
+        println("deepestTreesMerged : " + deepestTreesMerged)
 
         //Step 3 :
         val createdTrees = createTrees(deepestTreesMerged)
+        println("create : " + createdTrees)
 
         //Step 4 :
-        val newStage1 = currentStage.diff(deepest)
+        val newStage1 = currentStageTmp.diff(deepest)
         val newStage = newStage1 ++ createdTrees
 
-        commitTailRec(newStage)
+        println("newStage : " + newStage)
+        commitTailRec(newStage, (acc ++ originChildren).distinct)
       }
     }
 
-    commitTailRec(currentStage)
-    //le créer ici
+    commitTailRec(currentStage, List())
   }
 
 
@@ -97,8 +110,8 @@ object Commit {
 
 
   private def areAllOriginChildren(listPaths: List[String]): Boolean = {
-    val tmpListPaths = listPaths.map(path => path.split(" ")(2))
-    val elementsWithSubElements = tmpListPaths.filter(path => path.split("/").length > 1)
+    val tmpListPaths = listPaths.map(path => path.split(" "))
+    val elementsWithSubElements = tmpListPaths.filter(path => path(2).split(File.separator).length > 1)
     elementsWithSubElements.isEmpty
   }
 
