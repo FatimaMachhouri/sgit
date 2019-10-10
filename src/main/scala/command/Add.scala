@@ -1,8 +1,8 @@
 package command
 
-import java.io.{BufferedWriter, File, FileWriter}
+import java.io.{File}
 import utils.Hash.encryptThisString
-import scala.io.Source
+import utils.FileIO.{getContentFile, createFile, writeInFile}
 
 object Add {
 
@@ -16,25 +16,22 @@ object Add {
     val currentRepositoryPath = new File(".").getCanonicalPath
     val pathBlobs = currentRepositoryPath + File.separator + ".sgit" + File.separator + "Blobs"
 
-    filePaths.map(file => {
+    filePaths.foreach(file => {
       //Step 1 : We crypt the file content
-      val fileContent = Source.fromFile(file).mkString
+      val fileContent = getContentFile(file)
       val cryptedContent = encryptThisString(fileContent)
 
       //Step 2 : We create the blob file with a crypted name based on the content
-      val blobFile = new File(pathBlobs + File.separator + cryptedContent)
-      blobFile.createNewFile()
+      val blobFile = createFile(pathBlobs + File.separator + cryptedContent)
 
       //Step 3 : We write the file content in the blob
-      val bw = new BufferedWriter(new FileWriter(blobFile))
-      bw.write(fileContent)
-      bw.close()
+      writeInFile(pathBlobs + File.separator + cryptedContent, fileContent)
 
       //Step 4 : We get the stage content
       val stage = new File(".").getCanonicalPath + File.separator + ".sgit" + File.separator + "STAGE"
-      val stageContent = Source.fromFile(stage).mkString
+      val stageContent = getContentFile(stage)
 
-      //Step 5 : We check if the file is already staged
+      //Step 5 : We check if the file is already staged in order to not stage it twice
       val newStageContent = {
         if (alreadyStaged(file)) {
           val stageContentWithoutFile = stageContent.split("\n").filter(!_.contains(file))
@@ -45,22 +42,19 @@ object Add {
       }
 
       //Step 6 : We write the content in the stage file
-      val bws = new BufferedWriter(new FileWriter(currentRepositoryPath + File.separator + ".sgit" + File.separator + "STAGE"))
-      bws.write(newStageContent.toString)
-      bws.close()
-
+      writeInFile(currentRepositoryPath + File.separator + ".sgit" + File.separator + "STAGE", newStageContent.toString)
     })
   }
 
   /**
    *
    * @param file
-   * @return boolean
+   * @return a boolean
    * Return true if the file is already in the stage else false
    */
   private def alreadyStaged(file: String): Boolean = {
     val path = new File(".").getCanonicalPath + File.separator + ".sgit" + File.separator + "STAGE"
-    val stageContent = Source.fromFile(path).mkString
+    val stageContent = getContentFile(path)
     stageContent.contains(file)
   }
 
