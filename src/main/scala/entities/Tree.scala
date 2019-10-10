@@ -11,6 +11,6 @@ case class Tree(
    * @return a String corresponding to the hash based on the content of the tree
    */
   def idTree(): String = {
-    encryptThisString(content.mkString("/n"))
+    encryptThisString(content.mkString("\n"))
   }
 }
