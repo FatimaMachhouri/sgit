@@ -7,16 +7,57 @@ import entities.Tree
 import scala.annotation.tailrec
 import scala.io.Source
 import utils.FileIO.createTrees
+import utils.FileIO.createRootTree
+import utils.FileIO.createCommit
+import utils.FileIO.updateBranch
 
-import scala.util.matching.Regex
 
 object Commit {
 
   /**
    *
+   */
+  def commit(): Unit = {
+
+    //Step 1 : We create all trees excepting the root tree
+    val rootTree = createSubTreesofRoot()
+
+    //Step 2 : We create the root tree
+    val idRootTree = createRootTree(rootTree)
+
+    val idRootTreeLastCommit = {
+      //Step 1 : We get the branch
+      val currentRepositoryPath = new File(".").getCanonicalPath
+      val headPath = currentRepositoryPath + File.separator + ".sgit" + File.separator + "HEAD"
+      val currentBranch = Source.fromFile(headPath).mkString
+
+      //Step 2 :
+      val branchPath = currentRepositoryPath + File.separator + ".sgit" + File.separator + "Branches" + File.separator + currentBranch
+      val lastCommit = Source.fromFile(branchPath).mkString
+
+      //Step 3 :
+      val commitPath = currentRepositoryPath + File.separator + ".sgit" + File.separator + "Commits" + File.separator + lastCommit
+      Source.fromFile(commitPath).mkString.split("\n")(1)
+    }
+
+    //We check if last tree of the commit isn't the same that the new one that we want to create. If same, we don't commit
+    if(idRootTree != idRootTreeLastCommit) {
+      //Step 3 : We create the commit object
+      val idCommit = createCommit(idRootTree)
+
+      //Step 4 : We update the branch object
+      updateBranch(idCommit)
+
+      //Step 5 : We update the log object
+    }
+
+  }
+
+  /**
+   *
    * @return
    */
-  def commit(): List[String] = {
+  private def createSubTreesofRoot(): List[String] = {
     //We get the stage content
     val stage = new File(".").getCanonicalPath + File.separator + ".sgit" + File.separator + "STAGE"
     val stageContent = Source.fromFile(stage).mkString
