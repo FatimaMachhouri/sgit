@@ -22,12 +22,7 @@ object FileIO {
     })
 
     listTrees.map(tree => {
-      val treePathTab = tree.treePath.split(File.separator)
-      val newTreePathTab = {
-        if (treePathTab.length > 1) treePathTab.dropRight(1)
-        else treePathTab
-      }
-      "Tree " + tree.idTree() + " " + newTreePathTab.mkString(File.separator)
+      "Tree " + tree.idTree() + " " + tree.treePath
     })
 
   }
