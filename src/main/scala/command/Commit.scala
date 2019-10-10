@@ -1,18 +1,16 @@
 package command
 
 import java.io.File
+import java.nio.file.{Files, Paths}
 
 import entities.Tree
 
 import scala.annotation.tailrec
 import scala.io.Source
-import utils.FileIO.createTrees
-import utils.FileIO.createRootTree
-import utils.FileIO.createCommit
-import utils.FileIO.updateBranch
-
+import utils.FileIO.{createCommit, createRootTree, createTrees, updateBranch, updateLogFile}
 
 object Commit {
+
 
   /**
    *
@@ -33,11 +31,19 @@ object Commit {
 
       //Step 2 :
       val branchPath = currentRepositoryPath + File.separator + ".sgit" + File.separator + "Branches" + File.separator + currentBranch
-      val lastCommit = Source.fromFile(branchPath).mkString
+      val existsBranch = Files.exists(Paths.get(branchPath))
 
       //Step 3 :
-      val commitPath = currentRepositoryPath + File.separator + ".sgit" + File.separator + "Commits" + File.separator + lastCommit
-      Source.fromFile(commitPath).mkString.split("\n")(1)
+      val lastCommit = {
+        if (!existsBranch) "0000000000000000000000000000000000000000"
+        else Source.fromFile(branchPath).mkString
+      }
+
+      if (lastCommit == "0000000000000000000000000000000000000000") "Vide"
+      else {
+        val commitPath = currentRepositoryPath + File.separator + ".sgit" + File.separator + "Commits" + File.separator + lastCommit
+        Source.fromFile(commitPath).mkString.split("\n")(1)
+      }
     }
 
     //We check if last tree of the commit isn't the same that the new one that we want to create. If same, we don't commit
@@ -49,6 +55,7 @@ object Commit {
       updateBranch(idCommit)
 
       //Step 5 : We update the log object
+      updateLogFile(idCommit)
     }
 
   }
