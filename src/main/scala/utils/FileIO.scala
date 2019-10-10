@@ -122,5 +122,20 @@ object FileIO {
     bws.close()
   }
 
+  def updateLogFile(idCommit: String): Unit = {
+    //We get the current branch
+    val headPath = new File(".").getCanonicalPath + File.separator + ".sgit" + File.separator + "HEAD"
+    val currentBranch = Source.fromFile(headPath).mkString
+
+    val logPath = new File(".").getCanonicalPath + File.separator + ".sgit" + File.separator + "Logs" + File.separator + currentBranch
+    val logFileExists = Files.exists(Paths.get(logPath))
+
+    val commit = new File(".").getCanonicalPath + File.separator + ".sgit" + File.separator + "Commits" + File.separator + idCommit
+    val previousCommit = Source.fromFile(commit).mkString.split("\n")(0)
+
+    val bw = new BufferedWriter(new FileWriter(logPath, true))
+    bw.write(previousCommit + " " + idCommit + "\n")
+    bw.close()
+  }
 
 }

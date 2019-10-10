@@ -17,7 +17,7 @@ object Init {
 
     else {
       val files: List[String] = List("HEAD", "STAGE")
-      val folders: List[String] = List("Blobs", "Branches", "Commits", "Tags", "Trees")
+      val folders: List[String] = List("Blobs", "Branches", "Commits", "Logs", "Tags", "Trees")
 
       val newPath = ".sgit"
 
