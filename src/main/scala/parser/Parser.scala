@@ -56,7 +56,6 @@ object Parser extends App {
         }
 
         case "commit" => {
-          val rootPath = Path.sgitParentPath()
           if (Repository.isASgitRepository()) {
             val rootPath = Path.sgitParentPath()
             Commit.commit(rootPath)
