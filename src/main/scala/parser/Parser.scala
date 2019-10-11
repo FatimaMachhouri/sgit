@@ -2,7 +2,7 @@ package parser
 
 import java.io.File
 
-import command.{Add, Init}
+import command.{Add, Commit, Init}
 import scopt.OParser
 
 object Parser extends App {
@@ -17,12 +17,7 @@ object Parser extends App {
         .text("Here : How to use sgit"),
       cmd("init")
         .action((_, c) => c.copy(mode = "init"))
-        .text("Creates a .sgit directory in the current directory.")
-        .children(
-          arg[String]("<path>")
-            .optional()
-            .action((x, c) => c.copy(path = x))
-        ),
+        .text("Creates a .sgit directory in the current directory."),
       cmd("add")
         .action((_, c) => c.copy(mode = "add"))
         .text("Stages the files.")
@@ -33,6 +28,9 @@ object Parser extends App {
             .action((x, c) => c.copy(files = c.files :+ x))
             .text("File to add to the stage.")
         ),
+      cmd("commit")
+        .action((_, c) => c.copy(mode = "commit"))
+        .text("Commit")
     )
   }
 
@@ -46,6 +44,10 @@ object Parser extends App {
 
         case "add" => {
           Add.add(args.tail.toList)
+        }
+
+        case "commit" => {
+          Commit.commit()
         }
 
         case _ => {
