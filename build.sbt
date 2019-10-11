@@ -14,3 +14,5 @@ lazy val root = (project in file("."))
 import sbtassembly.AssemblyPlugin.defaultUniversalScript
 assemblyOption in assembly := (assemblyOption in assembly).value.copy(prependShellScript = Some(defaultUniversalScript(shebang = false)))
 assemblyJarName in assembly := s"${name.value}"
+
+parallelExecution in Test := false
