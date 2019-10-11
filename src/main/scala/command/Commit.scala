@@ -10,6 +10,7 @@ object Commit {
 
   /**
    *
+   * @param rootPath : String
    */
   def commit(rootPath: String): Unit = {
 
