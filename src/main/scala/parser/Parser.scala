@@ -3,7 +3,9 @@ package parser
 import java.io.File
 
 import command.{Add, Commit, Init}
+import entities.Repository
 import scopt.OParser
+import utils.CurrentPath
 
 object Parser extends App {
 
@@ -43,11 +45,23 @@ object Parser extends App {
         }
 
         case "add" => {
-          Add.add(args.tail.toList)
+          if (Repository.isASgitRepository()) {
+            val currentPath = CurrentPath.sgitParentPath()
+            Add.add(args.tail.toList)
+          }
+          else {
+            println("You can't run this command, you are not in a sgit repository. Please run sgit init.")
+          }
         }
 
         case "commit" => {
-          Commit.commit()
+          if (Repository.isASgitRepository()) {
+            val currentPath = CurrentPath.sgitParentPath()
+            Commit.commit()
+          }
+          else {
+            println("You can't run this command, you are not in a sgit repository. Please run sgit init.")
+          }
         }
 
         case _ => {
