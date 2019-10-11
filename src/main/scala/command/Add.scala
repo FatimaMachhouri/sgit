@@ -7,12 +7,12 @@ import utils.FileIO.{getContentFile, createFile, writeInFile}
 object Add {
 
   /**
-   *
+   * @param rootPath String
    * @param filePaths List[String]
    *
    * Creates a Blob File for each file of the list parameter in the currentPath/.sgit/Blobs with an encrypted name based on the SHA-1
    */
-  def add(filePaths: List[String]): Unit = {
+  def add(rootPath: String, filePaths: List[String]): Unit = {
     val currentRepositoryPath = new File(".").getCanonicalPath
     val pathBlobs = currentRepositoryPath + File.separator + ".sgit" + File.separator + "Blobs"
 

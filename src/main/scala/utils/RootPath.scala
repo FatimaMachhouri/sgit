@@ -4,12 +4,12 @@ import java.io.File
 
 import scala.annotation.tailrec
 
-object CurrentPath {
+object RootPath {
 
   /**
    *
    * @return a string
-   * Returns the parent directory of the .sgit directory
+   * Returns the parent directory of the .sgit directory ie the root directory
    * If the .sgit not found, returns an empty string ""
    */
   def sgitParentPath(): String = {
