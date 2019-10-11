@@ -5,7 +5,7 @@ import java.io.File
 import command.{Add, Commit, Init}
 import entities.Repository
 import scopt.OParser
-import utils.RootPath
+import utils.Path
 
 object Parser extends App {
 
@@ -46,8 +46,9 @@ object Parser extends App {
 
         case "add" => {
           if (Repository.isASgitRepository()) {
-            val rootPath = RootPath.sgitParentPath()
-            Add.add(rootPath, args.tail.toList)
+            val rootPath = Path.sgitParentPath()
+            val currentPath = new File(".").getCanonicalPath
+            Add.add(rootPath, currentPath, args.tail.toList)
           }
           else {
             println("You can't run this command, you are not in a sgit repository. Please run sgit init.")
@@ -56,7 +57,7 @@ object Parser extends App {
 
         case "commit" => {
           if (Repository.isASgitRepository()) {
-            val rootPath = RootPath.sgitParentPath()
+            val rootPath = Path.sgitParentPath()
             Commit.commit()
           }
           else {

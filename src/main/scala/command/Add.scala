@@ -8,13 +8,13 @@ object Add {
 
   /**
    * @param rootPath String
+   * @param currentPath String
    * @param filePaths List[String]
    *
    * Creates a Blob File for each file of the list parameter in the currentPath/.sgit/Blobs with an encrypted name based on the SHA-1
    */
-  def add(rootPath: String, filePaths: List[String]): Unit = {
-    val currentRepositoryPath = new File(".").getCanonicalPath
-    val pathBlobs = currentRepositoryPath + File.separator + ".sgit" + File.separator + "Blobs"
+  def add(rootPath: String, currentPath: String, filePaths: List[String]): Unit = {
+    val pathBlobs = rootPath + File.separator + ".sgit" + File.separator + "Blobs"
 
     filePaths.foreach(file => {
       //Step 1 : We crypt the file content
@@ -28,21 +28,25 @@ object Add {
       writeInFile(pathBlobs + File.separator + cryptedContent, fileContent)
 
       //Step 4 : We get the stage content
-      val stage = new File(".").getCanonicalPath + File.separator + ".sgit" + File.separator + "STAGE"
+      val stage = rootPath + File.separator + ".sgit" + File.separator + "STAGE"
       val stageContent = getContentFile(stage)
 
       //Step 5 : We check if the file is already staged in order to not stage it twice
       val newStageContent = {
-        if (alreadyStaged(file)) {
-          val stageContentWithoutFile = stageContent.split("\n").filter(!_.contains(file))
-          stageContentWithoutFile.mkString("\n") + "\n" + "Blob " + cryptedContent + " " + file
+        val relativePath = (currentPath + File.separator + file).replace(rootPath + "/", "")
+
+        println(relativePath)
+
+        if (alreadyStaged(rootPath, currentPath, file)) {
+          val stageContentWithoutFile = stageContent.split("\n").filter(!_.contains(relativePath))
+          stageContentWithoutFile.mkString("\n") + "\n" + "Blob " + cryptedContent + " " + relativePath
         }
-        else if (stageContent == "") "Blob " + cryptedContent + " " + file
-        else stageContent + "\n" + "Blob " + cryptedContent + " " + file
+        else if (stageContent == "") "Blob " + cryptedContent + " " + relativePath
+        else stageContent + "\n" + "Blob " + cryptedContent + " " + relativePath
       }
 
       //Step 6 : We write the content in the stage file
-      writeInFile(currentRepositoryPath + File.separator + ".sgit" + File.separator + "STAGE", newStageContent.toString)
+      writeInFile(rootPath + File.separator + ".sgit" + File.separator + "STAGE", newStageContent.toString)
     })
   }
 
@@ -52,10 +56,10 @@ object Add {
    * @return a boolean
    * Return true if the file is already in the stage else false
    */
-  private def alreadyStaged(file: String): Boolean = {
-    val path = new File(".").getCanonicalPath + File.separator + ".sgit" + File.separator + "STAGE"
+  private def alreadyStaged(rootPath: String, currentPath: String, file: String): Boolean = {
+    val path = rootPath + File.separator + ".sgit" + File.separator + "STAGE"
     val stageContent = getContentFile(path)
-    stageContent.contains(file)
+    stageContent.contains((currentPath + File.separator + file).replace(rootPath + "/", ""))
   }
 
 }
