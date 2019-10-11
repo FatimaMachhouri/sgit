@@ -11,7 +11,7 @@ object Commit {
   /**
    *
    */
-  def commit(): Unit = {
+  def commit(rootPath: String): Unit = {
 
     //Step 1 : We create all trees excepting the root tree
     val rootTree = createSubTreesofRoot()

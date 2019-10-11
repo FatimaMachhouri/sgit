@@ -56,9 +56,10 @@ object Parser extends App {
         }
 
         case "commit" => {
+          val rootPath = Path.sgitParentPath()
           if (Repository.isASgitRepository()) {
             val rootPath = Path.sgitParentPath()
-            Commit.commit()
+            Commit.commit(rootPath)
           }
           else {
             println("You can't run this command, you are not in a sgit repository. Please run sgit init.")
