@@ -14,7 +14,7 @@ object Commit {
   def commit(rootPath: String): Unit = {
 
     //Step 1 : We create all trees excepting the root tree
-    val rootTree = createSubTreesofRoot()
+    val rootTree = createSubTreesofRoot(rootPath)
 
     //Step 2 : We create the root tree
     val idRootTree = createRootTree(rootTree)
@@ -22,12 +22,11 @@ object Commit {
     //We get the last commit in order to not commit twice the same content consecutively
     val idRootTreeLastCommit = {
       //Step 1 : We get the branch name
-      val currentRepositoryPath = new File(".").getCanonicalPath
-      val headPath = currentRepositoryPath + File.separator + ".sgit" + File.separator + "HEAD"
+      val headPath = rootPath + File.separator + ".sgit" + File.separator + "HEAD"
       val currentBranch = getContentFile(headPath)
 
       //Step 2 : if it is the initial commit, we don't have a branch file created. We check if the branch file exists or not
-      val branchPath = currentRepositoryPath + File.separator + ".sgit" + File.separator + "Branches" + File.separator + currentBranch
+      val branchPath = rootPath + File.separator + ".sgit" + File.separator + "Branches" + File.separator + currentBranch
       val existsBranch = Files.exists(Paths.get(branchPath))
 
       //Step 3 : Based on the currentBranch, we get the last commit. If it's the initial commit, we assume that the lastCommit is 0000000000000000000000000000000000000000
@@ -38,7 +37,7 @@ object Commit {
 
       if (lastCommit == "0000000000000000000000000000000000000000") "InitialCommit"
       else {
-        val commitPath = currentRepositoryPath + File.separator + ".sgit" + File.separator + "Commits" + File.separator + lastCommit
+        val commitPath = rootPath + File.separator + ".sgit" + File.separator + "Commits" + File.separator + lastCommit
         getContentFile(commitPath).split("\n")(1)
       }
     }
@@ -63,9 +62,9 @@ object Commit {
    * @return a list of String
    * Creates the arborescence (except root tree) of the stage file.
    */
-  private def createSubTreesofRoot(): List[String] = {
+  private def createSubTreesofRoot(rootPath: String): List[String] = {
     //We get the stage content
-    val stage = new File(".").getCanonicalPath + File.separator + ".sgit" + File.separator + "STAGE"
+    val stage = rootPath + File.separator + ".sgit" + File.separator + "STAGE"
     val stageContent = getContentFile(stage)
 
     //We split in order to have each line of the stage file in a box. A line of the stage file has the form : Blob Hash Path
