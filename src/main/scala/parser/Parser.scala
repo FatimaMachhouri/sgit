@@ -41,8 +41,7 @@ object Parser extends App {
 
       config.mode match {
         case "init" => {
-          val rootPath = Path.sgitParentPath()
-          Init.init(rootPath)
+          Init.init()
         }
 
         case "add" => {
