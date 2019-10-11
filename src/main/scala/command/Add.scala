@@ -35,8 +35,6 @@ object Add {
       val newStageContent = {
         val relativePath = (currentPath + File.separator + file).replace(rootPath + "/", "")
 
-        println(relativePath)
-
         if (alreadyStaged(rootPath, currentPath, file)) {
           val stageContentWithoutFile = stageContent.split("\n").filter(!_.contains(relativePath))
           stageContentWithoutFile.mkString("\n") + "\n" + "Blob " + cryptedContent + " " + relativePath
