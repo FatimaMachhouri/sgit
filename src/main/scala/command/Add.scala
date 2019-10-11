@@ -22,7 +22,7 @@ object Add {
       val cryptedContent = encryptThisString(fileContent)
 
       //Step 2 : We create the blob file with a crypted name based on the content
-      val blobFile = createFile(pathBlobs + File.separator + cryptedContent)
+      createFile(pathBlobs + File.separator + cryptedContent)
 
       //Step 3 : We write the file content in the blob
       writeInFile(pathBlobs + File.separator + cryptedContent, fileContent)
@@ -37,7 +37,8 @@ object Add {
 
         if (alreadyStaged(rootPath, currentPath, file)) {
           val stageContentWithoutFile = stageContent.split("\n").filter(!_.contains(relativePath))
-          stageContentWithoutFile.mkString("\n") + "\n" + "Blob " + cryptedContent + " " + relativePath
+          val newStage = Array("Blob " + cryptedContent + " " + relativePath) ++ stageContentWithoutFile
+          newStage.mkString("\n")
         }
         else if (stageContent == "") "Blob " + cryptedContent + " " + relativePath
         else stageContent + "\n" + "Blob " + cryptedContent + " " + relativePath
