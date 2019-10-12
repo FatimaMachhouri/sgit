@@ -1,10 +1,13 @@
 package command
 
 import java.io.File
+
 import utils.FileIO.getCurrentBranch
-import utils.Path.{getFilesDirectory}
+import utils.Path.getFilesDirectory
 import utils.FileIO.getContentFile
 import utils.Hash.encryptThisString
+
+import scala.annotation.tailrec
 
 object Status {
 
@@ -16,12 +19,12 @@ object Status {
    */
   def status(rootPath: String): String = {
 
-    val untrackedFiles = {
-      val getUntracked = getUntrackedFiles(rootPath)
-      if (getUntracked.isEmpty) ""
+    val changesToBeCommitted = {
+      val changes = getChangesToBeCommitted(rootPath)
+      if (changes.isEmpty) ""
       else {
-        "Untracked files:\n" + "  (use 'git add <file>...' to include in what will be committed)\n" +
-          getUntracked.map(elem => "          " + elem).mkString("\n")
+        "Changes to be committed:\n" +
+          changes.map(elem => s"   ${Console.GREEN}" + "       " + elem + Console.RESET).mkString("\n")
       }
     }
 
@@ -30,20 +33,26 @@ object Status {
       if (getModified.isEmpty) ""
       else {
         "Changes not staged for commit\n" + "  (use 'git add <file>...' to update what will be committed)\n" +
-        getModified.map(elem => "          modified: " + elem).mkString("\n")
+          getModified.map(elem => s"   ${Console.RED}" + "       " + elem + Console.RESET).mkString("\n")
       }
     }
 
-    val newFiles = {
-      val changes = getChangesToBeCommitted(rootPath)
-      if (changes.isEmpty) ""
+    val untrackedFiles = {
+      val getUntracked = getUntrackedFiles(rootPath)
+      if (getUntracked.isEmpty) ""
       else {
-        "Changes to be committed:\n" +
-        changes.map(elem => "          TEST123: " + elem).mkString("\n")
+        "Untracked files:\n" + "  (use 'git add <file>...' to include in what will be committed)\n" +
+          getUntracked.map(elem => s"   ${Console.RED}" + "       " + elem + Console.RESET).mkString("\n")
       }
     }
 
-    getBranch(rootPath) + "\n\n" + untrackedFiles + "\n\n" + modifiedFiles + "\n\n" + newFiles
+    def prettyPrint(stringsToPrint: List[String]): String = {
+      if (stringsToPrint.length == 0) ""
+      else if (stringsToPrint.head != "") stringsToPrint.head + "\n\n" + prettyPrint(stringsToPrint.tail)
+      else prettyPrint(stringsToPrint.tail)
+    }
+
+    prettyPrint(List(getBranch(rootPath), changesToBeCommitted, modifiedFiles, untrackedFiles))
   }
 
 
@@ -102,10 +111,32 @@ object Status {
   /**
    *
    * @param rootPath
-   * @return a string
-   * Returns the staged files which are not in the last commit and the modified files (modified between the stage and the last commit)
+   * @return an array of string
+   * Returns the staged files which are not in the last commit and the modified files (different between the stage and the last commit)
    */
-  private def getChangesToBeCommitted(rootPath: String): List[String] = {
-    List()
+  private def getChangesToBeCommitted(rootPath: String): Array[String] = {
+    val stageContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGE")
+    val commitStageContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGECOMMIT")
+
+    val stageContentTab = stageContent.split("\n")
+    val lastCommitStageTab = commitStageContent.split("\n")
+
+    if (stageContent == "") Array()
+    else if (commitStageContent == "") stageContentTab.map(elem => "new file:   " + elem.split(" ")(2))
+    else {
+      //We get the new files
+      val filesStage = stageContentTab.map(elem => elem.split(" ")(2))
+      val filesCommit = lastCommitStageTab.map(elem => elem.split(" ")(2))
+      val newFiles = filesStage.diff(filesCommit)
+      val newFilesFormat = newFiles.map(file => "new file:   " + file)
+
+      //We get the modified files (different hash)
+      val newAndModifiedFiles = stageContentTab.diff(lastCommitStageTab).map(elem => elem.split(" ")(2))
+      val modifiedFiles = newAndModifiedFiles.diff(newFiles)
+      val modifiedFilesFormat = modifiedFiles.map(file => "modified:   " + file)
+
+      modifiedFilesFormat ++ newFilesFormat
+    }
   }
+
 }
