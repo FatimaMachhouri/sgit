@@ -103,7 +103,7 @@ object Status {
    *
    * @param rootPath
    * @return a string
-   * Returns the staged files which are not in the last commit
+   * Returns the staged files which are not in the last commit and the modified files (modified between the stage and the last commit)
    */
   private def getChangesToBeCommitted(rootPath: String): List[String] = {
     List()
