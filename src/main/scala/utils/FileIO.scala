@@ -203,4 +203,15 @@ object FileIO {
     bw.close()
   }
 
+
+  /**
+   *
+   * @param rootPath
+   * @return a string
+   */
+  def getCurrentBranch(rootPath: String): String = {
+    val headFilePath = rootPath + File.separator + ".sgit" + File.separator + "HEAD"
+    getContentFile(headFilePath)
+  }
+
 }
