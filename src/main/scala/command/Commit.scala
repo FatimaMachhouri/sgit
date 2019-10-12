@@ -4,7 +4,7 @@ import java.io.File
 import java.nio.file.{Files, Paths}
 import entities.Tree
 import scala.annotation.tailrec
-import utils.FileIO.{createCommit, createRootTree, createTrees, updateBranch, updateLogFile, getContentFile}
+import utils.FileIO.{createCommit, createRootTree, createTrees, updateBranch, updateLogFile, getContentFile, writeInFile}
 
 object Commit {
 
@@ -53,6 +53,9 @@ object Commit {
 
       //We update the log object by adding the new commit
       updateLogFile(idCommit)
+
+      //We update the stage file commit by copying the content of the stage
+      writeInFile(rootPath + File.separator + ".sgit" + File.separator + "STAGECOMMIT", getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGE"))
     }
 
   }

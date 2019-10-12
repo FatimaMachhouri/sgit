@@ -2,7 +2,7 @@ package parser
 
 import java.io.File
 
-import command.{Add, Commit, Init}
+import command.{Add, Commit, Init, Status}
 import entities.Repository
 import scopt.OParser
 import utils.Path
@@ -32,7 +32,10 @@ object Parser extends App {
         ),
       cmd("commit")
         .action((_, c) => c.copy(mode = "commit"))
-        .text("Commit")
+        .text("Commit"),
+      cmd("status")
+        .action((_, c) => c.copy(mode = "status"))
+        .text("Status")
     )
   }
 
@@ -59,6 +62,16 @@ object Parser extends App {
           if (Repository.isASgitRepository()) {
             val rootPath = Path.sgitParentPath()
             Commit.commit(rootPath)
+          }
+          else {
+            println("You can't run this command, you are not in a sgit repository. Please run sgit init.")
+          }
+        }
+
+        case "status" => {
+          if (Repository.isASgitRepository()) {
+            val rootPath = Path.sgitParentPath()
+            println(Status.status(rootPath))
           }
           else {
             println("You can't run this command, you are not in a sgit repository. Please run sgit init.")
