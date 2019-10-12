@@ -32,7 +32,7 @@ object Status {
       val getModified = getModifiedFiles(rootPath)
       if (getModified.isEmpty) ""
       else {
-        "Changes not staged for commit\n" + "  (use 'git add <file>...' to update what will be committed)\n" +
+        "Changes not staged for commit\n" + "  (use 'sgit add <file>...' to update what will be committed)\n" +
           getModified.map(elem => s"   ${Console.RED}" + "       " + elem + Console.RESET).mkString("\n")
       }
     }
@@ -41,7 +41,7 @@ object Status {
       val getUntracked = getUntrackedFiles(rootPath)
       if (getUntracked.isEmpty) ""
       else {
-        "Untracked files:\n" + "  (use 'git add <file>...' to include in what will be committed)\n" +
+        "Untracked files:\n" + "  (use 'sgit add <file>...' to include in what will be committed)\n" +
           getUntracked.map(elem => s"   ${Console.RED}" + "       " + elem + Console.RESET).mkString("\n")
       }
     }
