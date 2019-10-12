@@ -17,7 +17,7 @@ object Init {
     if (isAlreadySgitRepository()) false
 
     else {
-      val files: List[String] = List("HEAD", "STAGE")
+      val files: List[String] = List("HEAD", "STAGE", "STAGECOMMIT")
       val folders: List[String] = List("Blobs", "Branches", "Commits", "Logs", "Tags", "Trees")
 
       val newPath = ".sgit"
