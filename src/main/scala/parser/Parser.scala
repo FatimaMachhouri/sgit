@@ -71,7 +71,7 @@ object Parser extends App {
         case "status" => {
           if (Repository.isASgitRepository()) {
             val rootPath = Path.sgitParentPath()
-            Status.status(rootPath)
+            println(Status.status(rootPath))
           }
           else {
             println("You can't run this command, you are not in a sgit repository. Please run sgit init.")
