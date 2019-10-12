@@ -27,4 +27,28 @@ object Path {
     sgitParentPathTailRec(currentRepositoryPathTab)
   }
 
+
+  /**
+   *
+   * @param rootContent Array[File]
+   * @param acc List[File]
+   * @return a list of file
+   * Returns the content (files and sub-directories) of a directory
+   * If the path directory that we want to list the content is "path", rootContent is "new File(path).listFiles"
+   * acc is originally an empty list
+   */
+  @tailrec
+  def contentDirectoryTailRec(rootContent: Array[File], acc: List[File]): List[File] = {
+    if (rootContent.isEmpty) acc
+
+    else if (rootContent.head.isFile) {
+      contentDirectoryTailRec(rootContent.tail, rootContent.head :: acc)
+    }
+
+    else {
+      val subDirectory = new File(rootContent.head.toString).listFiles()
+      contentDirectoryTailRec(rootContent.tail ++ subDirectory, rootContent.head :: acc)
+    }
+  }
+
 }
