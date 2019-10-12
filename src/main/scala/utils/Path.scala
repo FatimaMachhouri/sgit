@@ -64,6 +64,7 @@ object Path {
    * @param path String
    * @return a list of string
    * Returns all the content files (and sub files) of a directory
+   * Exclude the .sgit directory
    */
   def getFilesDirectory(path: String): List[String] = {
 
