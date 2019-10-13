@@ -1,8 +1,126 @@
 package command
 
+import java.io.File
 import scala.annotation.tailrec
+import utils.Path.getFilesDirectory
+import utils.FileIO.getContentFile
+import utils.Hash.encryptThisString
 
 object Diff {
+
+  /**
+   *
+   * @param rootPath String
+   * @return Map[String, List[String]
+   * Returns a map of String -> List[String]
+   * The string corresponds to the path of the modified files (modified between last stage and working tree)
+   * The list of strings correponds to list of differences between the staged version and the working tree version (each list is associated to its file)
+   */
+  def diff(rootPath: String): Map[String, List[String]] = {
+
+    //Get paths of modified files
+    val modifiedFiles = getModifiedFiles(rootPath)
+
+    //The working tree : The contentFilesDirectoryMap val contains file paths as keys and file contents corresponding as value
+    val contentFilesDirectory = modifiedFiles.map(path => getContentFile(rootPath + File.separator + path))
+    val contentFilesDirectoryMap = mapPathAndContent(modifiedFiles, contentFilesDirectory, Map())
+
+    //The stage
+      //Step 1 : We get the files (hash and path) that are modified in the STAGE
+    val stageContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGE")
+    val stagedFilesModified = stageContent.split("\n").filter(elem => modifiedFiles.contains(elem.split(" ")(2)))
+
+      //Step 2 : For each file, we retrieve the content by using hash and blobs
+    val filesHash = stagedFilesModified.map(elem => elem.split(" ")(1))
+    val stagedFilesContent = filesHash.map(hash => getContentFile(rootPath + File.separator + ".sgit" + File.separator + "Blobs" + File.separator + hash))
+
+      //Step 3 : The stagedFilesMap val contains file paths as keys and file contents corresponding as value
+    val stagedFilesMap = mapPathAndContent(stagedFilesModified.map(elem => elem.split(" ")(2)), stagedFilesContent, Map())
+
+    //We merge the maps : The merged map contains the path as key and the 2 contents as value (content of the working tree file and of the staged file)
+    val mergedMap = mergeMaps(contentFilesDirectoryMap, stagedFilesMap, Map())
+
+    //For each file (key), we get the list of differences
+    val differences = mergedMap.values.map(elem => {
+      val text1 = elem(1).split("\n").toList
+      val text2 = elem(0).split("\n").toList
+      val matrix = mostLargestCommonSubSetMatrix(text1, text2, 0, 0, Map())
+      getDifferences(text1, text2, text1.length - 1, text2.length - 1, matrix, List())
+    })
+
+    //Last step : We create the map with : file path -> List of differencse
+    mapPathAndListDifferences(mergedMap.keys, differences, Map())
+  }
+
+
+  /**
+   *
+   * @param map1 Map[String, String]
+   * @param map2 Map[String, String]
+   * @param acc Map[String, List[String]]
+   * @return Map[String, List[String]]
+   * Given 2 maps, returns the map1 and map2 merged (based on the keys of map1)
+   * The map2 keys that aren't in the map1 keys will not be processed
+   */
+  @tailrec
+  def mergeMaps(map1: Map[String, String], map2: Map[String, String], acc: Map[String, List[String]]): Map[String, List[String]] = {
+    if (map1.isEmpty) return acc
+    else mergeMaps(map1.tail, map2, acc + (map1.head._1 -> List(map1.head._2, map2.get(map1.head._1).getOrElse(""))))
+  }
+
+
+  /**
+   *
+   * @param listPaths Iterable[String]
+   * @param listDifferences Iterable[ List[String] ]
+   * @param acc Map[ String, List[String] ]
+   * @return Map[ String, List[String] ]
+   * Given an array of keys and an array of values, returns the map associated
+   * Pre-conditions = listPaths.length == listDifferences.length
+   */
+  @tailrec
+  def mapPathAndListDifferences(listPaths: Iterable[String], listDifferences: Iterable[List[String]], acc: Map[String, List[String]]): Map[String, List[String]] = {
+    if (listPaths.isEmpty) acc
+    else mapPathAndListDifferences(listPaths.tail, listDifferences.tail, acc + (listPaths.head -> listDifferences.head))
+  }
+
+
+  /**
+   *
+   * @param listKeys Array[String]
+   * @param listValues Array[String]
+   * @param acc Map[String, String]
+   * @return Map[String, String]
+   * Given an array of keys and an array of values, returns the map associated
+   * Pre-conditions = listKeys.length == listValues.length
+   */
+  @tailrec
+  private def mapPathAndContent(listKeys: Array[String], listValues: Array[String], acc: Map[String, String]): Map[String, String] = {
+    if (listKeys.isEmpty) acc
+    else mapPathAndContent(listKeys.tail, listValues.tail, acc + (listKeys.head -> listValues.head))
+  }
+
+
+  /**
+   *
+   * @param rootPath string
+   * @return an array of string
+   * Returns modified files ie files present in the stage file and in the directory but having different hash
+   */
+  private def getModifiedFiles(rootPath: String): Array[String] = {
+    val filesInCurrentDirectory = getFilesDirectory(rootPath)
+    val listHashAndFilesDirectory = filesInCurrentDirectory.map(file => List(encryptThisString(getContentFile(file)), file.replace(rootPath + File.separator, "")))
+
+    val stageContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGE")
+    val stageContentTab = stageContent.split("\n")
+
+    if (stageContent == "") Array()
+    else {
+      val listHashAndFilesStage = stageContentTab.map(elem => List(elem.split(" ")(1), elem.split(" ")(2)))
+      listHashAndFilesStage.diff(listHashAndFilesDirectory).map(elem => elem(1)).distinct
+    }
+  }
+
 
   /**
    *
