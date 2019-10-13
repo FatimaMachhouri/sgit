@@ -2,7 +2,7 @@ package parser
 
 import java.io.File
 
-import command.{Add, Commit, Init, Status}
+import command.{Add, Commit, Diff, Init, Status}
 import entities.Repository
 import scopt.OParser
 import utils.Path
@@ -35,7 +35,10 @@ object Parser extends App {
         .text("Commit"),
       cmd("status")
         .action((_, c) => c.copy(mode = "status"))
-        .text("Status")
+        .text("Status"),
+      cmd("diff")
+        .action((_, c) => c.copy(mode = "diff"))
+        .text("Diff")
     )
   }
 
@@ -72,6 +75,17 @@ object Parser extends App {
           if (Repository.isASgitRepository()) {
             val rootPath = Path.sgitParentPath()
             println(Status.status(rootPath))
+          }
+          else {
+            println("You can't run this command, you are not in a sgit repository. Please run sgit init.")
+          }
+        }
+
+        case "diff" => {
+          if (Repository.isASgitRepository()) {
+            val rootPath = Path.sgitParentPath()
+            val listPathsDifferences = Diff.diff(rootPath)
+            println(Diff.prettyFormat(listPathsDifferences, ""))
           }
           else {
             println("You can't run this command, you are not in a sgit repository. Please run sgit init.")

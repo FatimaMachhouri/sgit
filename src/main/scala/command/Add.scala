@@ -16,7 +16,7 @@ object Add {
   def add(rootPath: String, currentPath: String, filePaths: List[String]): Unit = {
     val pathBlobs = rootPath + File.separator + ".sgit" + File.separator + "Blobs"
 
-    filePaths.foreach(file => {
+    filePaths.map(file => {
       //Step 1 : We crypt the file content
       val fileContent = getContentFile(file)
       val cryptedContent = encryptThisString(fileContent)
