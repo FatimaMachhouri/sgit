@@ -1,5 +1,7 @@
 package command
 
+import scala.annotation.tailrec
+
 object Diff {
 
 
@@ -16,36 +18,33 @@ object Diff {
    * Pre-conditions : index1 = list1.length-1, index2 = list2.length-1, acc = List()
    * The matrix parameter corresponds to the result of mostLargestCommonSubSetMatrix
    */
+  @tailrec
   def getDifferences(list1: List[String], list2: List[String], index1: Int, index2: Int, matrix: Map[(Int, Int), Int], acc: List[String]): List[String] = {
-    if (index1 == 0 & index2 == 0) {
-      if (matrix.get((index1, index2)) == matrix.get((index1, index2 + 1))) "- " + list1(0) :: acc
-      else acc
-    }
+    val currentElem = matrix.get((index1, index2)).getOrElse(-1)
+    val previousElemLine = matrix.get((index1, index2 - 1)).getOrElse(0)
+    val previousElemCol = matrix.get((index1 - 1, index2)).getOrElse(0)
 
-    //First line
-    else if (index1 == 0) {
-      //TODO
-      getDifferences(list1, list2, index1, index2 - 1, matrix, acc)
-    }
 
-    //First column
-    else if (index2 == 0) {
-      //TODO
-      getDifferences(list1, list2, index1 - 1, index2, matrix, acc)
-    }
-
-    else if (matrix.get(index1, index2 - 1) == matrix.get(index1 - 1, index2) & matrix.get(index1 -1, index2) == matrix.get(index1 - 1, index2 - 1)) {
-      getDifferences(list1, list2, index1 - 1, index2 - 1, matrix, acc)
-    }
-
-    else if (matrix.get(index1 - 1, index2).getOrElse(0) > matrix.get(index1, index2 - 1).getOrElse(0)) {
-      val diff = "- " + list1(index1)
-      getDifferences(list1, list2, index1 - 1, index2, matrix, diff :: acc)
+    if (currentElem == -1) {
+      if (index1 == -1 & index2 == -1) acc
+      else if (index1 == -1) {
+        list2.dropRight(list2.length - 1 - index2).map(elem => "+ " + elem) ++ acc
+      }
+      else {
+        list1.dropRight(list1.length - 1 - index1).map(elem => "- " + elem) ++ acc
+      }
     }
 
     else {
-      val add = "+ " + list2(index2)
-      getDifferences(list1, list2, index1, index2 - 1, matrix, add :: acc)
+      if (currentElem == previousElemLine) {
+        getDifferences(list1, list2, index1, index2 - 1, matrix, "+ " + list2(index2) :: acc)
+      }
+      else if (currentElem == previousElemCol) {
+        getDifferences(list1, list2, index1 - 1, index2, matrix, "- " + list1(index1) :: acc)
+      }
+      else {
+        getDifferences(list1, list2, index1 - 1, index2 - 1, matrix, acc)
+      }
     }
   }
 
@@ -64,6 +63,7 @@ object Diff {
    * Each elem of the list1 is put in line and each elem of the list2 is put in column.
    * The return map contains the list of (line index, column index) -> value associated in the matrix
    */
+  @tailrec
   def mostLargestCommonSubSetMatrix(list1: List[String], list2: List[String], index1: Int, index2: Int, acc: Map[(Int, Int), Int]): Map[(Int, Int), Int] = {
     //We stop when we go through the 2 lists
     if (list1.length - 1 <= index1 && list2.length <= index2) acc
