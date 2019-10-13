@@ -4,47 +4,35 @@ import scala.annotation.tailrec
 
 object Diff {
 
-
   /**
    *
-   * @param list1 List[String]
-   * @param list2 List[String]
+   * @param text1 List[String]
+   * @param text2 List[String]
    * @param index1 Int
    * @param index2 Int
    * @param matrix Map[(Int,Int), Int]
    * @param acc List[String]
    * @return List[String]
-   * Given 2 lists which represents 2 texts, returns the list of deletions and additions of the list2 comparing to the list1
-   * Pre-conditions : index1 = list1.length-1, index2 = list2.length-1, acc = List()
+   * Given 2 lists which represents 2 texts, returns the list of deletions and additions of the text2 comparing to the text1
+   * Pre-conditions : index1 = text1.length-1, index2 = text2.length-1, acc = List()
    * The matrix parameter corresponds to the result of mostLargestCommonSubSetMatrix
    */
   @tailrec
-  def getDifferences(list1: List[String], list2: List[String], index1: Int, index2: Int, matrix: Map[(Int, Int), Int], acc: List[String]): List[String] = {
+  def getDifferences(text1: List[String], text2: List[String], index1: Int, index2: Int, matrix: Map[(Int, Int), Int], acc: List[String]): List[String] = {
     val currentElem = matrix.get((index1, index2)).getOrElse(-1)
     val previousElemLine = matrix.get((index1, index2 - 1)).getOrElse(0)
     val previousElemCol = matrix.get((index1 - 1, index2)).getOrElse(0)
 
-
     if (currentElem == -1) {
       if (index1 == -1 & index2 == -1) acc
-      else if (index1 == -1) {
-        list2.dropRight(list2.length - 1 - index2).map(elem => "+ " + elem) ++ acc
-      }
-      else {
-        list1.dropRight(list1.length - 1 - index1).map(elem => "- " + elem) ++ acc
-      }
+      else if (index1 == -1) text2.dropRight(text2.length - 1 - index2).map(elem => "+ " + elem) ++ acc
+      else text1.dropRight(text1.length - 1 - index1).map(elem => "- " + elem) ++ acc
     }
 
     else {
-      if (currentElem == previousElemLine) {
-        getDifferences(list1, list2, index1, index2 - 1, matrix, "+ " + list2(index2) :: acc)
-      }
-      else if (currentElem == previousElemCol) {
-        getDifferences(list1, list2, index1 - 1, index2, matrix, "- " + list1(index1) :: acc)
-      }
-      else {
-        getDifferences(list1, list2, index1 - 1, index2 - 1, matrix, acc)
-      }
+      if (currentElem == previousElemLine) getDifferences(text1, text2, index1, index2 - 1, matrix, "+ " + text2(index2) :: acc)
+      else if (currentElem == previousElemCol) getDifferences(text1, text2, index1 - 1, index2, matrix, "- " + text1(index1) :: acc)
+      else getDifferences(text1, text2, index1 - 1, index2 - 1, matrix, acc)
     }
   }
 
