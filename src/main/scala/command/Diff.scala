@@ -55,6 +55,27 @@ object Diff {
 
   /**
    *
+   * @param listFilesDiffs
+   * @param acc
+   * @return
+   */
+  def prettyFormat(listFilesDiffs: Map[String, List[String]], acc: String): String = {
+    if (listFilesDiffs.isEmpty) acc
+    else {
+      val currentFile = listFilesDiffs.head
+      val fileName = currentFile._1
+      val diffs = currentFile._2.map(diff => {
+        if (diff.split(" ")(0) == "+") s"   ${Console.GREEN}" + diff + Console.RESET
+        else s"   ${Console.RED}" + diff + Console.RESET
+      })
+      val format = fileName + "\n" + diffs.mkString("\n")
+      prettyFormat(listFilesDiffs.tail, acc + format)
+    }
+  }
+
+
+  /**
+   *
    * @param map1 Map[String, String]
    * @param map2 Map[String, String]
    * @param acc Map[String, List[String]]
@@ -63,7 +84,7 @@ object Diff {
    * The map2 keys that aren't in the map1 keys will not be processed
    */
   @tailrec
-  def mergeMaps(map1: Map[String, String], map2: Map[String, String], acc: Map[String, List[String]]): Map[String, List[String]] = {
+  private def mergeMaps(map1: Map[String, String], map2: Map[String, String], acc: Map[String, List[String]]): Map[String, List[String]] = {
     if (map1.isEmpty) return acc
     else mergeMaps(map1.tail, map2, acc + (map1.head._1 -> List(map1.head._2, map2.get(map1.head._1).getOrElse(""))))
   }
@@ -79,7 +100,7 @@ object Diff {
    * Pre-conditions = listPaths.length == listDifferences.length
    */
   @tailrec
-  def mapPathAndListDifferences(listPaths: Iterable[String], listDifferences: Iterable[List[String]], acc: Map[String, List[String]]): Map[String, List[String]] = {
+  private def mapPathAndListDifferences(listPaths: Iterable[String], listDifferences: Iterable[List[String]], acc: Map[String, List[String]]): Map[String, List[String]] = {
     if (listPaths.isEmpty) acc
     else mapPathAndListDifferences(listPaths.tail, listDifferences.tail, acc + (listPaths.head -> listDifferences.head))
   }
@@ -136,7 +157,7 @@ object Diff {
    * The matrix parameter corresponds to the result of mostLargestCommonSubSetMatrix
    */
   @tailrec
-  def getDifferences(text1: List[String], text2: List[String], index1: Int, index2: Int, matrix: Map[(Int, Int), Int], acc: List[String]): List[String] = {
+  private def getDifferences(text1: List[String], text2: List[String], index1: Int, index2: Int, matrix: Map[(Int, Int), Int], acc: List[String]): List[String] = {
     val currentElem = matrix.get((index1, index2)).getOrElse(-1)
     val previousElemLine = matrix.get((index1, index2 - 1)).getOrElse(0)
     val previousElemCol = matrix.get((index1 - 1, index2)).getOrElse(0)
@@ -170,7 +191,7 @@ object Diff {
    * The return map contains the list of (line index, column index) -> value associated in the matrix
    */
   @tailrec
-  def mostLargestCommonSubSetMatrix(list1: List[String], list2: List[String], index1: Int, index2: Int, acc: Map[(Int, Int), Int]): Map[(Int, Int), Int] = {
+  private def mostLargestCommonSubSetMatrix(list1: List[String], list2: List[String], index1: Int, index2: Int, acc: Map[(Int, Int), Int]): Map[(Int, Int), Int] = {
     //We stop when we go through the 2 lists
     if (list1.length - 1 <= index1 && list2.length <= index2) acc
 
