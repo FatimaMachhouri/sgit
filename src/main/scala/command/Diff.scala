@@ -90,7 +90,7 @@ object Diff {
   @tailrec
   private def mergeMaps(map1: Map[String, String], map2: Map[String, String], acc: Map[String, List[String]]): Map[String, List[String]] = {
     if (map1.isEmpty) return acc
-    else mergeMaps(map1.tail, map2, acc + (map1.head._1 -> List(map1.head._2, map2.get(map1.head._1).getOrElse(""))))
+    else mergeMaps(map1.tail, map2, acc + (map1.head._1 -> List(map1.head._2, map2.getOrElse(map1.head._1, ""))))
   }
 
 
@@ -162,9 +162,9 @@ object Diff {
    */
   @tailrec
   private def getDifferences(text1: List[String], text2: List[String], index1: Int, index2: Int, matrix: Map[(Int, Int), Int], acc: List[String]): List[String] = {
-    val currentElem = matrix.get((index1, index2)).getOrElse(-1)
-    val previousElemLine = matrix.get((index1, index2 - 1)).getOrElse(0)
-    val previousElemCol = matrix.get((index1 - 1, index2)).getOrElse(0)
+    val currentElem = matrix.getOrElse((index1, index2), -1)
+    val previousElemLine = matrix.getOrElse((index1, index2 - 1), 0)
+    val previousElemCol = matrix.getOrElse((index1 - 1, index2), 0)
 
     if (currentElem == -1) {
       if (index1 == -1 & index2 == -1) acc
