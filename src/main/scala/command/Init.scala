@@ -13,14 +13,14 @@ object Init {
    * Can be used to convert an existing unversioned project to a SGit repository or initialize a new empty repository.
    * If the directory is already a SGit Repository (contains a .sgit directory), returns false otherwise creates HEAD and STAGE files and Blobs, Branches, Commits, Logs, Tags and Trees directories in .sgit directory in the path parameter directory.
    */
-  def init(): Boolean = {
+  def init(rootPath: String): Boolean = {
     if (isAlreadySgitRepository()) false
 
     else {
       val files: List[String] = List("HEAD", "STAGE", "STAGECOMMIT")
       val folders: List[String] = List("Blobs", "Branches", "Commits", "Logs", "Tags", "Trees")
 
-      val newPath = ".sgit"
+      val newPath = if (rootPath != "") rootPath + File.separator + ".sgit" else ".sgit"
       createDirectory(newPath)
 
       folders.map(folder => createDirectory(newPath + File.separator + folder))
