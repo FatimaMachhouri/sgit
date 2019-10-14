@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import utils.Hash.encryptThisString
 import entities.Tree
+import scala.annotation.tailrec
 import scala.io.Source
 
 
@@ -218,6 +219,43 @@ object FileIO {
    */
   def isADirectory(rootPath: String): Boolean = {
     new File(rootPath).isDirectory
+  }
+
+
+  /**
+   *
+   * @param rootPath String
+   * @param commit String
+   * @return List[String]
+   * Returns the blobs present in the stage when the commit parameter was created
+   * The commit corresponds to the hash of the commit we want to recreate the tree
+   * A blob has the following format : Blob Hash Path
+   */
+  def recreateTree(rootPath: String, commit: String): List[String] = {
+    val rootTreeHash = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "Commits" + File.separator + commit).split("\n")(1)
+
+    //The map key is the path of a hash tree and the value is the hash tree
+    @tailrec
+    def recreateTreeTailRec(treesToProcess: Map[String, String], acc: List[String]): List[String] = {
+      if (treesToProcess.isEmpty) acc
+
+      else if (!getContentFile(rootPath + File.separator + ".sgit" + File.separator + "Trees" + File.separator + treesToProcess.head._2).contains("Tree")) { //if we have only blobs in the currentTree
+        val currentTreeHash = treesToProcess.head._2
+        val blobs = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "Trees" + File.separator + currentTreeHash).split("\n")
+        recreateTreeTailRec(treesToProcess.tail, acc ++ blobs.map(elem => "Blob " + elem.split(" ")(1) + " " + treesToProcess.head._1 + File.separator + elem.split(" ")(2)))
+      }
+
+      else { //We have at least 1 tree in the current tree
+        val currentTreeHash = treesToProcess.head._2
+        val treeContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "Trees" + File.separator + currentTreeHash).split("\n")
+        val blobs = treeContent.filter(elem => elem.split(" ")(0) == "Blob")
+        val subTrees = treeContent.filter(elem => elem.split(" ")(0) == "Tree")
+        val subTreesHash = subTrees.map(elem => (treesToProcess.head._1 + File.separator + elem.split(" ")(2) -> elem.split(" ")(1))) //we get pathTree -> hashTree
+
+        recreateTreeTailRec(treesToProcess.tail ++ subTreesHash, acc ++ blobs.map(elem => "Blob " + elem.split(" ")(1) + " " + treesToProcess.head._1 + File.separator + elem.split(" ")(2)))
+      }
+    }
+    recreateTreeTailRec(Map(("" -> rootTreeHash)), List()).map(elem => "Blob " + elem.split(" ")(1) + " " + elem.split(" ")(2).drop(1)) //we drop the first file separator /test/test.txt -> test/test.txt
   }
 
 }
