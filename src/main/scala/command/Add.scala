@@ -26,6 +26,7 @@ object Add {
     allFiles.map(file => {
       //Step 0 : if we used . to add, we have to re-format the paths
       val formatFile = if (file.contains("./")) file.replace("./", "") else file
+      println(formatFile)
 
       //Step 1 : We crypt the file content
       val fileContent = getContentFile(formatFile)
@@ -46,7 +47,7 @@ object Add {
         val relativePath = (currentPath + File.separator + formatFile).replace(rootPath + "/", "")
 
         if (alreadyStaged(rootPath, currentPath, formatFile)) {
-          val stageContentWithoutFile = stageContent.split("\n").filter(!_.contains(relativePath))
+          val stageContentWithoutFile = stageContent.split("\n").filter(_.split(" ")(2) != relativePath)
           val newStage = Array("Blob " + cryptedContent + " " + relativePath) ++ stageContentWithoutFile
           newStage.mkString("\n")
         }
