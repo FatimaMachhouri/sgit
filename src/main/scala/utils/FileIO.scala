@@ -214,4 +214,14 @@ object FileIO {
     getContentFile(headFilePath)
   }
 
+
+  /**
+   *
+   * @param rootPath
+   * @return
+   */
+  def isADirectory(rootPath: String): Boolean = {
+    new File(rootPath).isDirectory
+  }
+
 }
