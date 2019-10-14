@@ -2,7 +2,8 @@ package command
 
 import java.io.{File}
 import utils.Hash.encryptThisString
-import utils.FileIO.{getContentFile, createFile, writeInFile}
+import utils.FileIO.{getContentFile, createFile, writeInFile, isADirectory}
+import utils.Path.getFilesDirectory
 
 object Add {
 
@@ -16,9 +17,18 @@ object Add {
   def add(rootPath: String, currentPath: String, filePaths: List[String]): Unit = {
     val pathBlobs = rootPath + File.separator + ".sgit" + File.separator + "Blobs"
 
-    filePaths.map(file => {
+    val directories = filePaths.filter(elem => isADirectory(elem))
+    val directoriesFiles = directories.map(elem => getFilesDirectory(elem))
+    val files = filePaths.filter(elem => !isADirectory(elem))
+
+    val allFiles = List.concat(files, directoriesFiles.flatten)
+
+    allFiles.map(file => {
+      //Step 0 : if we used . to add, we have to re-format the paths
+      val formatFile = if (file.contains("./")) file.replace("./", "") else file
+
       //Step 1 : We crypt the file content
-      val fileContent = getContentFile(file)
+      val fileContent = getContentFile(formatFile)
       val cryptedContent = encryptThisString(fileContent)
 
       //Step 2 : We create the blob file with a crypted name based on the content
@@ -33,9 +43,9 @@ object Add {
 
       //Step 5 : We check if the file is already staged in order to not stage it twice
       val newStageContent = {
-        val relativePath = (currentPath + File.separator + file).replace(rootPath + "/", "")
+        val relativePath = (currentPath + File.separator + formatFile).replace(rootPath + "/", "")
 
-        if (alreadyStaged(rootPath, currentPath, file)) {
+        if (alreadyStaged(rootPath, currentPath, formatFile)) {
           val stageContentWithoutFile = stageContent.split("\n").filter(!_.contains(relativePath))
           val newStage = Array("Blob " + cryptedContent + " " + relativePath) ++ stageContentWithoutFile
           newStage.mkString("\n")
