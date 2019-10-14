@@ -207,24 +207,24 @@ object Diff {
       if (newIndex1 == 0) {
         if (list1(newIndex1) == list2(newIndex2)) mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> 1))
         else if (newIndex2 == 0) mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> 0))
-        else mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> acc.get((newIndex1, newIndex2-1)).getOrElse(0)))
+        else mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> acc.getOrElse((newIndex1, newIndex2 - 1), 0)))
       }
 
       //If we are in the first column
       else if (newIndex2 == 0) {
         if (list1(newIndex1) == list2(newIndex2)) mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> 1))
         else if (newIndex1 == 0) mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> 0))
-        else mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> acc.get((newIndex1-1, newIndex2)).getOrElse(0)))
+        else mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> acc.getOrElse((newIndex1 - 1, newIndex2), 0)))
       }
 
       else { //Neither the first column nor the first line
         if (list1(newIndex1) == list2(newIndex2)) {
-          val newValue = acc.get((newIndex1-1, newIndex2-1)).getOrElse(0) + 1
+          val newValue = acc.getOrElse((newIndex1 - 1, newIndex2 - 1), 0) + 1
           mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> newValue))
         }
         else {
-          val previousValueLine = acc.get((newIndex1, newIndex2 - 1)).getOrElse(0)
-          val previousValueColumn = acc.get( (newIndex1 - 1 , newIndex2) ).getOrElse(0)
+          val previousValueLine = acc.getOrElse((newIndex1, newIndex2 - 1), 0)
+          val previousValueColumn = acc.getOrElse((newIndex1 - 1, newIndex2), 0)
           val maxValue = if (previousValueColumn > previousValueLine) previousValueColumn else previousValueLine
           mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> maxValue))
         }
