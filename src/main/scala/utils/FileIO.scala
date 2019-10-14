@@ -168,9 +168,9 @@ object FileIO {
     val pathBranchFile = {
       if (parentCommit == "None") createBranchFile(rootPath)
       else {
-        val headPath = new File(".").getCanonicalPath + File.separator + ".sgit" + File.separator + "HEAD"
+        val headPath = rootPath + File.separator + ".sgit" + File.separator + "HEAD"
         val currentBranch = getContentFile(headPath)
-        new File(".").getCanonicalPath + File.separator + ".sgit" + File.separator + "Branches" + File.separator + currentBranch
+        rootPath + File.separator + ".sgit" + File.separator + "Branches" + File.separator + currentBranch
       }
     }
     writeInFile(pathBranchFile, commitId)
@@ -190,9 +190,12 @@ object FileIO {
 
     val commit = rootPath + File.separator + ".sgit" + File.separator + "Commits" + File.separator + idCommit
     val previousCommit = getContentFile(commit).mkString.split("\n")(0)
+    val formatDate = new SimpleDateFormat("d-M-y hh:mm:ss aa")
+
+    val logFileContent = previousCommit + " " + idCommit + " " + formatDate.format(Calendar.getInstance().getTime())
 
     val bw = new BufferedWriter(new FileWriter(logPath, true))
-    bw.write(previousCommit + " " + idCommit + "\n")
+    bw.write(logFileContent + "\n")
     bw.close()
   }
 
