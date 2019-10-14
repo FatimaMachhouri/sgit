@@ -21,35 +21,39 @@ object Diff {
     //Get paths of modified files
     val modifiedFiles = getModifiedFiles(rootPath)
 
-    //The working tree : The contentFilesDirectoryMap val contains file paths as keys and file contents corresponding as value
-    val contentFilesDirectory = modifiedFiles.map(path => getContentFile(rootPath + File.separator + path))
-    val contentFilesDirectoryMap = mapPathAndContent(modifiedFiles, contentFilesDirectory, Map())
+    if (modifiedFiles.isEmpty) Map()
+    else {
+      //The working tree : The contentFilesDirectoryMap val contains file paths as keys and file contents corresponding as value
+      val contentFilesDirectory = modifiedFiles.map(path => getContentFile(rootPath + File.separator + path))
+      val contentFilesDirectoryMap = mapPathAndContent(modifiedFiles, contentFilesDirectory, Map())
 
-    //The stage
+      //The stage
       //Step 1 : We get the files (hash and path) that are modified in the STAGE
-    val stageContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGE")
-    val stagedFilesModified = stageContent.split("\n").filter(elem => modifiedFiles.contains(elem.split(" ")(2)))
+      val stageContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGE")
+      val stagedFilesModified = stageContent.split("\n").filter(elem => modifiedFiles.contains(elem.split(" ")(2)))
 
       //Step 2 : For each file, we retrieve the content by using hash and blobs
-    val filesHash = stagedFilesModified.map(elem => elem.split(" ")(1))
-    val stagedFilesContent = filesHash.map(hash => getContentFile(rootPath + File.separator + ".sgit" + File.separator + "Blobs" + File.separator + hash))
+      val filesHash = stagedFilesModified.map(elem => elem.split(" ")(1))
+      val stagedFilesContent = filesHash.map(hash => getContentFile(rootPath + File.separator + ".sgit" + File.separator + "Blobs" + File.separator + hash))
 
       //Step 3 : The stagedFilesMap val contains file paths as keys and file contents corresponding as value
-    val stagedFilesMap = mapPathAndContent(stagedFilesModified.map(elem => elem.split(" ")(2)), stagedFilesContent, Map())
+      val stagedFilesMap = mapPathAndContent(stagedFilesModified.map(elem => elem.split(" ")(2)), stagedFilesContent, Map())
 
-    //We merge the maps : The merged map contains the path as key and the 2 contents as value (content of the working tree file and of the staged file)
-    val mergedMap = mergeMaps(contentFilesDirectoryMap, stagedFilesMap, Map())
+      //We merge the maps : The merged map contains the path as key and the 2 contents as value (content of the working tree file and of the staged file)
+      val mergedMap = mergeMaps(contentFilesDirectoryMap, stagedFilesMap, Map())
 
-    //For each file (key), we get the list of differences
-    val differences = mergedMap.values.map(elem => {
-      val text1 = elem(1).split("\n").toList
-      val text2 = elem(0).split("\n").toList
-      val matrix = mostLargestCommonSubSetMatrix(text1, text2, 0, 0, Map())
-      getDifferences(text1, text2, text1.length - 1, text2.length - 1, matrix, List())
-    })
+      //For each file (key), we get the list of differences
+      val differences = mergedMap.values.map(elem => {
+        val text1 = elem(1).split("\n").toList
+        val text2 = elem(0).split("\n").toList
+        val matrix = mostLargestCommonSubSetMatrix(text1, text2, 0, 0, Map())
+        getDifferences(text1, text2, text1.length - 1, text2.length - 1, matrix, List())
+      })
 
-    //Last step : We create the map with : file path -> List of differencse
-    mapPathAndListDifferences(mergedMap.keys, differences, Map())
+      //Last step : We create the map with : file path -> List of differencse
+      mapPathAndListDifferences(mergedMap.keys, differences, Map())
+    }
+
   }
 
 
