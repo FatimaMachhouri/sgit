@@ -98,8 +98,6 @@ object FileIO {
 
     val rootTree = Tree("root", contentRoot)
 
-    println("PATH " + pathTrees + File.separator + rootTree.idTree())
-
     createFile(pathTrees + File.separator + rootTree.idTree())
     writeInFile(pathTrees + File.separator + rootTree.idTree(), rootTree.content.mkString("\n"))
 
