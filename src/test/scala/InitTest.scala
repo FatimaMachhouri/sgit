@@ -7,28 +7,27 @@ import utils.FileIO.createDirectory
 class InitTest extends FlatSpec with BeforeAndAfter {
 
   before {
-    val initDirectoryTest = new File(".").getCanonicalPath + File.separator + "InitDirectoryTest"
-    createDirectory(initDirectoryTest)
+    val initTestDirectory = new File(".").getCanonicalPath + File.separator + "InitDirectoryTest"
+    createDirectory(initTestDirectory)
   }
 
   after {
-    val initDirectoryTest = new File(".").getCanonicalPath + File.separator + "InitDirectoryTest"
-    val directory = new Directory(new File(initDirectoryTest))
+    val initTestDirectory = new File(".").getCanonicalPath + File.separator + "InitDirectoryTest"
+    val directory = new Directory(new File(initTestDirectory))
     directory.deleteRecursively()
   }
 
   "Init" should "create a .sgit in the path" in {
+    val initTestDirectory = new File(".").getCanonicalPath + File.separator + "InitDirectoryTest"
     val init = Init
-    val initDirectoryTest = new File(".").getCanonicalPath + File.separator + "InitDirectoryTest"
-    assert(init.init(initDirectoryTest))
+    assert(init.init(initTestDirectory))
   }
 
   it should "not create a .sgit if already exists in the path" in {
+    val initTestDirectory = new File(".").getCanonicalPath + File.separator + "InitDirectoryTest"
     val init = Init
-    val initDirectoryTest = new File(".").getCanonicalPath + File.separator + "InitDirectoryTest"
-    init.init(initDirectoryTest)
-    assert(!init.init(initDirectoryTest))
+    init.init(initTestDirectory)
+    assert(!init.init(initTestDirectory))
   }
-
 
 }
