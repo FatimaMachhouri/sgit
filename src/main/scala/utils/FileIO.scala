@@ -115,7 +115,7 @@ object FileIO {
   def createCommit(rootPath: String, commitTree: String): String = {
     val pathCommits = rootPath + File.separator + ".sgit" + File.separator + "Commits"
 
-    val formatDate = new SimpleDateFormat("d-M-y_hh:mm:ss::aa")
+    val formatDate = new SimpleDateFormat("y-M-d_hh:mm:ss::aa")
 
     val commitContent = getLastCommit(rootPath) + "\n" + commitTree + "\n" + formatDate.format(Calendar.getInstance().getTime())
 
@@ -190,7 +190,7 @@ object FileIO {
 
     val commit = rootPath + File.separator + ".sgit" + File.separator + "Commits" + File.separator + idCommit
     val previousCommit = getContentFile(commit).mkString.split("\n")(0)
-    val formatDate = new SimpleDateFormat("d-M-y_hh:mm:ss::aa")
+    val formatDate = new SimpleDateFormat("y-M-d_hh:mm:ss::aa")
 
     val logFileContent = previousCommit + " " + idCommit + " " + formatDate.format(Calendar.getInstance().getTime())
 
