@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import utils.Hash.encryptThisString
 import entities.Tree
+import scala.annotation.tailrec
 import scala.io.Source
 
 
@@ -69,10 +70,9 @@ object FileIO {
    * @param listTrees
    * @return a list of string
    */
-  def createTrees(listTrees: List[Tree]): List[String] = {
+  def createTrees(rootPath: String, listTrees: List[Tree]): List[String] = {
     //We get the path
-    val currentRepositoryPath = new File(".").getCanonicalPath
-    val pathTrees = currentRepositoryPath + File.separator + ".sgit" + File.separator + "Trees"
+    val pathTrees = rootPath + File.separator + ".sgit" + File.separator + "Trees"
 
     listTrees.map(tree => {
       //We create the tree file based on the crypted content of the tree
@@ -93,10 +93,9 @@ object FileIO {
    * @return a string
    * Creates the root tree based on the list parameter and return the hash string of the root tree
    */
-  def createRootTree(contentRoot: List[String]): String = {
+  def createRootTree(rootPath: String, contentRoot: List[String]): String = {
     //We get the path
-    val currentRepositoryPath = new File(".").getCanonicalPath
-    val pathTrees = currentRepositoryPath + File.separator + ".sgit" + File.separator + "Trees"
+    val pathTrees = rootPath + File.separator + ".sgit" + File.separator + "Trees"
 
     val rootTree = Tree("root", contentRoot)
 
@@ -114,13 +113,12 @@ object FileIO {
    * Creates the commit file with its content (parent commit, tree, date). The name of the file is its content crypted
    * Returns the hash of the commit created.
    */
-  def createCommit(commitTree: String): String = {
-    val currentRepositoryPath = new File(".").getCanonicalPath
-    val pathCommits = currentRepositoryPath + File.separator + ".sgit" + File.separator + "Commits"
+  def createCommit(rootPath: String, commitTree: String): String = {
+    val pathCommits = rootPath + File.separator + ".sgit" + File.separator + "Commits"
 
-    val formatDate = new SimpleDateFormat("d-M-y hh:mm:ss aa")
+    val formatDate = new SimpleDateFormat("y-M-d_hh:mm:ss::aa")
 
-    val commitContent = getLastCommit() + "\n" + commitTree + "\n" + formatDate.format(Calendar.getInstance().getTime())
+    val commitContent = getLastCommit(rootPath) + "\n" + commitTree + "\n" + formatDate.format(Calendar.getInstance().getTime())
 
     createFile(pathCommits + File.separator + encryptThisString(commitContent))
     writeInFile(pathCommits + File.separator + encryptThisString(commitContent), commitContent)
@@ -134,15 +132,12 @@ object FileIO {
    * @return a string
    * Returns the hash of the last commit
    */
-  def getLastCommit(): String = {
-    //We get the path
-    val currentRepositoryPath = new File(".").getCanonicalPath
-
+  def getLastCommit(rootPath: String): String = {
     //We get the current branch
-    val currentBranch = getContentFile(currentRepositoryPath + File.separator + ".sgit" + File.separator + "HEAD")
+    val currentBranch = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "HEAD")
 
     //We get the last commit in the branch file corresponding
-    val pathBranches = currentRepositoryPath + File.separator + ".sgit" + File.separator + "Branches"
+    val pathBranches = rootPath + File.separator + ".sgit" + File.separator + "Branches"
 
     //If the file not exists, it's the initial commit
     if (!Files.exists(Paths.get(pathBranches + File.separator + currentBranch))) "None"
@@ -155,12 +150,11 @@ object FileIO {
    * @return a string
    * Creates the current branch file and returns its path
    */
-  def createBranchFile(): String = {
-    val currentRepositoryPath = new File(".").getCanonicalPath
-    val currentBranch = getContentFile(currentRepositoryPath + File.separator + ".sgit" + File.separator + "HEAD")
+  def createBranchFile(rootPath: String): String = {
+    val currentBranch = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "HEAD")
 
-    createFile(currentRepositoryPath + File.separator + ".sgit" + File.separator + "Branches" + File.separator + currentBranch)
-    currentRepositoryPath + File.separator + ".sgit" + File.separator + "Branches" + File.separator + currentBranch
+    createFile(rootPath + File.separator + ".sgit" + File.separator + "Branches" + File.separator + currentBranch)
+    rootPath + File.separator + ".sgit" + File.separator + "Branches" + File.separator + currentBranch
   }
 
 
@@ -170,14 +164,14 @@ object FileIO {
    * Write the commitId in the current branch file.
    * If the branch doesn't exists, it creates it and write the last commit id. Else, it replaces the last commit id.
    */
-  def updateBranch(commitId: String): Unit = {
-    val parentCommit = getLastCommit()
+  def updateBranch(rootPath: String, commitId: String): Unit = {
+    val parentCommit = getLastCommit(rootPath)
     val pathBranchFile = {
-      if (parentCommit == "None") createBranchFile()
+      if (parentCommit == "None") createBranchFile(rootPath)
       else {
-        val headPath = new File(".").getCanonicalPath + File.separator + ".sgit" + File.separator + "HEAD"
+        val headPath = rootPath + File.separator + ".sgit" + File.separator + "HEAD"
         val currentBranch = getContentFile(headPath)
-        new File(".").getCanonicalPath + File.separator + ".sgit" + File.separator + "Branches" + File.separator + currentBranch
+        rootPath + File.separator + ".sgit" + File.separator + "Branches" + File.separator + currentBranch
       }
     }
     writeInFile(pathBranchFile, commitId)
@@ -189,17 +183,20 @@ object FileIO {
    * @param idCommit
    * Writes in the log file of the current branch the current commit and its parent commit
    */
-  def updateLogFile(idCommit: String): Unit = {
-    val headPath = new File(".").getCanonicalPath + File.separator + ".sgit" + File.separator + "HEAD"
+  def updateLogFile(rootPath: String, idCommit: String): Unit = {
+    val headPath = rootPath + File.separator + ".sgit" + File.separator + "HEAD"
     val currentBranch = getContentFile(headPath)
 
-    val logPath = new File(".").getCanonicalPath + File.separator + ".sgit" + File.separator + "Logs" + File.separator + currentBranch
+    val logPath = rootPath + File.separator + ".sgit" + File.separator + "Logs" + File.separator + currentBranch
 
-    val commit = new File(".").getCanonicalPath + File.separator + ".sgit" + File.separator + "Commits" + File.separator + idCommit
+    val commit = rootPath + File.separator + ".sgit" + File.separator + "Commits" + File.separator + idCommit
     val previousCommit = getContentFile(commit).mkString.split("\n")(0)
+    val formatDate = new SimpleDateFormat("y-M-d_hh:mm:ss::aa")
+
+    val logFileContent = previousCommit + " " + idCommit + " " + formatDate.format(Calendar.getInstance().getTime())
 
     val bw = new BufferedWriter(new FileWriter(logPath, true))
-    bw.write(previousCommit + " " + idCommit + "\n")
+    bw.write(logFileContent + "\n")
     bw.close()
   }
 
@@ -222,6 +219,43 @@ object FileIO {
    */
   def isADirectory(rootPath: String): Boolean = {
     new File(rootPath).isDirectory
+  }
+
+
+  /**
+   *
+   * @param rootPath String
+   * @param commit String
+   * @return List[String]
+   * Returns the blobs present in the stage when the commit parameter was created
+   * The commit corresponds to the hash of the commit we want to recreate the tree
+   * A blob has the following format : Blob Hash Path
+   */
+  def recreateTree(rootPath: String, commit: String): List[String] = {
+    val rootTreeHash = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "Commits" + File.separator + commit).split("\n")(1)
+
+    //The map key is the path of a hash tree and the value is the hash tree
+    @tailrec
+    def recreateTreeTailRec(treesToProcess: Map[String, String], acc: List[String]): List[String] = {
+      if (treesToProcess.isEmpty) acc
+
+      else if (!getContentFile(rootPath + File.separator + ".sgit" + File.separator + "Trees" + File.separator + treesToProcess.head._2).contains("Tree")) { //if we have only blobs in the currentTree
+        val currentTreeHash = treesToProcess.head._2
+        val blobs = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "Trees" + File.separator + currentTreeHash).split("\n")
+        recreateTreeTailRec(treesToProcess.tail, acc ++ blobs.map(elem => "Blob " + elem.split(" ")(1) + " " + treesToProcess.head._1 + File.separator + elem.split(" ")(2)))
+      }
+
+      else { //We have at least 1 tree in the current tree
+        val currentTreeHash = treesToProcess.head._2
+        val treeContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "Trees" + File.separator + currentTreeHash).split("\n")
+        val blobs = treeContent.filter(elem => elem.split(" ")(0) == "Blob")
+        val subTrees = treeContent.filter(elem => elem.split(" ")(0) == "Tree")
+        val subTreesHash = subTrees.map(elem => (treesToProcess.head._1 + File.separator + elem.split(" ")(2) -> elem.split(" ")(1))) //we get pathTree -> hashTree
+
+        recreateTreeTailRec(treesToProcess.tail ++ subTreesHash, acc ++ blobs.map(elem => "Blob " + elem.split(" ")(1) + " " + treesToProcess.head._1 + File.separator + elem.split(" ")(2)))
+      }
+    }
+    recreateTreeTailRec(Map(("" -> rootTreeHash)), List()).map(elem => "Blob " + elem.split(" ")(1) + " " + elem.split(" ")(2).drop(1)) //we drop the first file separator /test/test.txt -> test/test.txt
   }
 
 }

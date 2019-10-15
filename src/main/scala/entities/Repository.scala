@@ -10,9 +10,8 @@ object Repository {
    * @return a boolean
    * True if the repository contains a .sgit or if its parent directories contain a .sgit
    */
-  def isASgitRepository(): Boolean = {
-    val currentRepositoryPath = new File(".").getCanonicalPath
-    val currentRepositoryPathTab = currentRepositoryPath.split(File.separator)
+  def isASgitRepository(path: String): Boolean = {
+    val currentRepositoryPathTab = path.split(File.separator)
 
     @tailrec
     def isASgitRepositoryTailRec(directory: Array[String]): Boolean = {

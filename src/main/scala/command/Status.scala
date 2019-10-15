@@ -1,13 +1,10 @@
 package command
 
 import java.io.File
-
 import utils.FileIO.getCurrentBranch
 import utils.Path.getFilesDirectory
 import utils.FileIO.getContentFile
 import utils.Hash.encryptThisString
-
-import scala.annotation.tailrec
 
 object Status {
 
@@ -46,6 +43,7 @@ object Status {
       }
     }
 
+
     def prettyPrint(stringsToPrint: List[String]): String = {
       if (stringsToPrint.length == 0) ""
       else if (stringsToPrint.head != "") stringsToPrint.head + "\n\n" + prettyPrint(stringsToPrint.tail)
@@ -61,7 +59,7 @@ object Status {
    * @param rootPath
    * @return a string
    */
-  private def getBranch(rootPath: String): String = {
+  def getBranch(rootPath: String): String = {
     "On branch " + getCurrentBranch(rootPath)
   }
 
@@ -72,7 +70,7 @@ object Status {
    * @return a string
    * Returns untracked files ie files present in the directory but not in the stage file
    */
-  private def getUntrackedFiles(rootPath: String): List[String] = {
+  def getUntrackedFiles(rootPath: String): List[String] = {
     val filesInCurrentDirectory = getFilesDirectory(rootPath).map(elem => elem.replace(rootPath + File.separator, ""))
     val stageContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGE")
 
@@ -114,7 +112,7 @@ object Status {
    * @return an array of string
    * Returns the staged files which are not in the last commit and the modified files (different between the stage and the last commit)
    */
-  private def getChangesToBeCommitted(rootPath: String): Array[String] = {
+  def getChangesToBeCommitted(rootPath: String): Array[String] = {
     val stageContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGE")
     val commitStageContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGECOMMIT")
 

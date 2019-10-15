@@ -18,7 +18,7 @@ object Commit {
     val rootTree = createSubTreesofRoot(rootPath)
 
     //Step 2 : We create the root tree
-    val idRootTree = createRootTree(rootTree)
+    val idRootTree = createRootTree(rootPath, rootTree)
 
     //We get the last commit in order to not commit twice the same content consecutively
     val idRootTreeLastCommit = {
@@ -46,13 +46,13 @@ object Commit {
     //We check if last tree of the commit isn't the same that the new one that we want to create. If same, we don't commit
     if(idRootTree != idRootTreeLastCommit) {
       //We create the commit object
-      val idCommit = createCommit(idRootTree)
+      val idCommit = createCommit(rootPath, idRootTree)
 
       //We update the branch object by adding the new commit
-      updateBranch(idCommit)
+      updateBranch(rootPath, idCommit)
 
       //We update the log object by adding the new commit
-      updateLogFile(idCommit)
+      updateLogFile(rootPath, idCommit)
 
       //We update the stage file commit by copying the content of the stage
       writeInFile(rootPath + File.separator + ".sgit" + File.separator + "STAGECOMMIT", getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGE"))
@@ -91,7 +91,7 @@ object Commit {
 
         val deepestTreesMerged = merge(deepest.distinct)
 
-        val createdTrees = createTrees(deepestTreesMerged)
+        val createdTrees = createTrees(rootPath, deepestTreesMerged)
 
         val newStageTmp = currentStageTmp.diff(deepest)
         val newStage = newStageTmp ++ createdTrees
