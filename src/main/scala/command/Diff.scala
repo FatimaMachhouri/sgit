@@ -161,7 +161,7 @@ object Diff {
    * The matrix parameter corresponds to the result of mostLargestCommonSubSetMatrix
    */
   @tailrec
-  private def getDifferences(text1: List[String], text2: List[String], index1: Int, index2: Int, matrix: Map[(Int, Int), Int], acc: List[String]): List[String] = {
+  def getDifferences(text1: List[String], text2: List[String], index1: Int, index2: Int, matrix: Map[(Int, Int), Int], acc: List[String]): List[String] = {
     val currentElem = matrix.getOrElse((index1, index2), -1)
     val previousElemLine = matrix.getOrElse((index1, index2 - 1), 0)
     val previousElemCol = matrix.getOrElse((index1 - 1, index2), 0)
@@ -195,7 +195,7 @@ object Diff {
    * The return map contains the list of (line index, column index) -> value associated in the matrix
    */
   @tailrec
-  private def mostLargestCommonSubSetMatrix(list1: List[String], list2: List[String], index1: Int, index2: Int, acc: Map[(Int, Int), Int]): Map[(Int, Int), Int] = {
+  def mostLargestCommonSubSetMatrix(list1: List[String], list2: List[String], index1: Int, index2: Int, acc: Map[(Int, Int), Int]): Map[(Int, Int), Int] = {
     //We stop when we go through the 2 lists
     if (list1.length - 1 <= index1 && list2.length <= index2) acc
 
