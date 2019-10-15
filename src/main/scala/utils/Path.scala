@@ -14,9 +14,8 @@ object Path {
    * Returns the parent directory of the .sgit directory ie the root directory
    * If the .sgit not found, returns an empty string ""
    */
-  def sgitParentPath(): String = {
-    val currentRepositoryPath = new File(".").getCanonicalPath
-    val currentRepositoryPathTab = currentRepositoryPath.split(File.separator)
+  def sgitParentPath(path: String): String = {
+    val currentRepositoryPathTab = path.split(File.separator)
 
     @tailrec
     def sgitParentPathTailRec(directory: Array[String]): String = {
