@@ -1,6 +1,6 @@
 import java.io.File
 import org.scalatest.{BeforeAndAfter, FlatSpec}
-import utils.FileIO.{createDirectory, getContentFile, writeInFile}
+import utils.FileIO.{createDirectory, getContentFile, writeInFile, createFile}
 import utils.Hash.encryptThisString
 import scala.reflect.io.Directory
 import command.{Add, Init}
@@ -24,8 +24,7 @@ class AddTest extends FlatSpec with BeforeAndAfter {
   "Add" should "create a blob file in the Blobs directory" in {
     val addTestDirectory = new File(".").getCanonicalPath + File.separator + "AddDirectoryTest"
 
-    val file = new File(addTestDirectory + File.separator + "test.txt")
-    file.createNewFile()
+    createFile(addTestDirectory + File.separator + "test.txt")
 
     Add.add(addTestDirectory, addTestDirectory, List(addTestDirectory + File.separator + "test.txt"))
 
@@ -37,8 +36,7 @@ class AddTest extends FlatSpec with BeforeAndAfter {
   it should "create a blob which has the same content as the file" in {
     val addTestDirectory = new File(".").getCanonicalPath + File.separator + "AddDirectoryTest"
 
-    val file = new File(addTestDirectory + File.separator + "test.txt")
-    file.createNewFile()
+    createFile(addTestDirectory + File.separator + "test.txt")
     writeInFile(addTestDirectory + File.separator + "test.txt", "test content")
 
     Add.add(addTestDirectory, addTestDirectory, List(addTestDirectory + File.separator + "test.txt"))
@@ -52,8 +50,7 @@ class AddTest extends FlatSpec with BeforeAndAfter {
   it should "add the blob created to the stage file if it isn't already staged" in {
     val addTestDirectory = new File(".").getCanonicalPath + File.separator + "AddDirectoryTest"
 
-    val file = new File(addTestDirectory + File.separator + "test.txt")
-    file.createNewFile()
+    createFile(addTestDirectory + File.separator + "test.txt")
 
     Add.add(addTestDirectory, addTestDirectory, List(addTestDirectory + File.separator + "test.txt"))
 
@@ -66,8 +63,7 @@ class AddTest extends FlatSpec with BeforeAndAfter {
   it should "not add the blob created to the stage file if it is already staged" in {
     val addTestDirectory = new File(".").getCanonicalPath + File.separator + "AddDirectoryTest"
 
-    val file = new File(addTestDirectory + File.separator + "test.txt")
-    file.createNewFile()
+    createFile(addTestDirectory + File.separator + "test.txt")
 
     Add.add(addTestDirectory, addTestDirectory, List(addTestDirectory + File.separator + "test.txt"))
     Add.add(addTestDirectory, addTestDirectory, List(addTestDirectory + File.separator + "test.txt"))
