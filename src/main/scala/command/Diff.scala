@@ -223,9 +223,7 @@ object Diff {
           mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> newValue))
         }
         else {
-          val previousValueLine = acc.getOrElse((newIndex1, newIndex2 - 1), 0)
-          val previousValueColumn = acc.getOrElse((newIndex1 - 1, newIndex2), 0)
-          val maxValue = if (previousValueColumn > previousValueLine) previousValueColumn else previousValueLine
+          val maxValue = Math.max(acc.getOrElse((newIndex1, newIndex2 - 1), 0), acc.getOrElse((newIndex1 - 1, newIndex2), 0))
           mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> maxValue))
         }
       }
