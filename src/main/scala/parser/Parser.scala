@@ -160,7 +160,29 @@ object Parser extends App {
             }
 
             else if (config.stat) { //sgit log --stat
-              println("sgitlog2")
+              logs.toList.map(f = elem => {
+                println(elem._1)
+
+                def plusMinus(list: List[String]): String = {
+                  s"${Console.GREEN}" + list.filter(elem => elem.charAt(0) == '+').map(elem => elem.charAt(0)).mkString("") + Console.RESET + s"${Console.RED}" +list.filter(elem => elem.charAt(0) == '-').map(elem => elem.charAt(0)).mkString("") + Console.RESET
+                }
+
+
+                elem._2.map(commit => {
+                  val nbDifferences = commit.listDifferences.toList.map(elem => "  " + elem._1 + " | " + elem._2.length + " " + plusMinus(elem._2))
+                  val newEmptyFiles = commit.listNewFiles.filter(elem => !commit.listDifferences.keys.toList.contains(elem))
+
+                  println(
+                    s"${Console.YELLOW}  commit " +
+                      commit.commitHash + Console.RESET +
+                      " (" + elem._1 + ")" + "\n" +
+                      "  Date:  " + commit.date + "\n" +
+                      newEmptyFiles.map(elem => "  " + elem + " | 0").mkString("\n") + "\n" +
+                      nbDifferences.mkString("\n") + "\n"
+
+                  )
+                })
+              })
             }
 
           }
