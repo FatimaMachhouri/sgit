@@ -7,4 +7,7 @@ case class Config(
                    arg: String = "",
                    patch: Boolean = false,
                    stat: Boolean = false,
+                   name: String = "",
+                   displayAll: Boolean = false,
+                   verbose: Boolean = false
                  )

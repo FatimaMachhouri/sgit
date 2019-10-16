@@ -1,10 +1,11 @@
 package parser
 
 import java.io.File
-import command.{Add, Commit, Diff, Init, Log, Status}
+import command.{Add, Commit, Diff, Init, Log, Status, BranchTag}
 import entities.Repository
 import scopt.OParser
 import utils.Path
+import utils.FileIO.getContentFile
 
 object Parser extends App {
 
@@ -53,6 +54,32 @@ object Parser extends App {
           opt[Unit]("stat")
             .text("Log --stat")
             .action((_, c) => c.copy(stat = true))
+        ),
+      cmd("branch")
+        .action((_, c) => c.copy(mode = "branch"))
+        .text("Branch")
+        .children(
+          arg[String]("name")
+            .optional()
+            .action((x, c) => c.copy(name = x))
+            .text("Branch name"),
+          opt[Unit]('a', "all")
+            .optional()
+            .action((_, c) => c.copy(displayAll = true))
+            .text("Display all branches"),
+          opt[Unit]('v', "verbose")
+            .optional()
+            .action((_, c) => c.copy(verbose = true))
+            .text("Show all branches and tags and last commit hash for each one")
+        ),
+      cmd("tag")
+        .action((_, c) => c.copy(mode = "tag"))
+        .text("Tag")
+        .children(
+          arg[String]("name")
+            .required()
+            .action((x, c) => c.copy(name = x))
+            .text("Tag name"),
         ),
     )
   }
@@ -186,6 +213,54 @@ object Parser extends App {
               })
             }
 
+          }
+          else {
+            println("You can't run this command, you are not in a sgit repository. Please run sgit init.")
+          }
+        }
+
+        case "branch" => {
+          val currentPath = new File(".").getCanonicalPath
+          if (Repository.isASgitRepository(currentPath)) {
+            val rootPath = Path.sgitParentPath(currentPath)
+            if (!config.name.isEmpty) BranchTag.createBranch(rootPath, config.name)
+
+            else if (config.verbose) {
+              val branches = BranchTag.listBranches(rootPath).map(b =>
+                if (b.split(" ")(0) == getContentFile(rootPath + File.separator + ".sgit" + File.separator + "HEAD")) s"${Console.GREEN}* Branch : " + b + Console.RESET
+                else "  Branch : " + b
+              ).mkString("\n")
+              val tags = BranchTag.listTags(rootPath).map(t => "  Tag    : " + t).mkString("\n")
+              println(branches + "\n" + tags)
+            }
+
+            else {
+              val branches = {
+                val listBranches = BranchTag.listBranches(rootPath)
+                if (listBranches.isEmpty) ""
+                else listBranches.map(b =>
+                  if (b.split(" ")(0) == getContentFile(rootPath + File.separator + ".sgit" + File.separator + "HEAD")) s"${Console.GREEN}* Branch : " + b.split(" ")(0) + Console.RESET
+                  else "  Branch : " + b.split(" ")(0)
+                ).mkString("\n")
+              }
+              val tags = {
+                val listTags = BranchTag.listTags(rootPath)
+                if (listTags.isEmpty) ""
+                else listTags.map(t => "  Tag    : " + t.split(" ")(0)).mkString("\n")
+              }
+              println(branches + "\n" + tags)
+            }
+          }
+          else {
+            println("You can't run this command, you are not in a sgit repository. Please run sgit init.")
+          }
+        }
+
+        case "tag" => {
+          val currentPath = new File(".").getCanonicalPath
+          if (Repository.isASgitRepository(currentPath)) {
+            val rootPath = Path.sgitParentPath(currentPath)
+            BranchTag.createTag(rootPath, config.name)
           }
           else {
             println("You can't run this command, you are not in a sgit repository. Please run sgit init.")
