@@ -130,22 +130,20 @@ object Parser extends App {
             else if (config.patch) { //sgit log -p
               logs.toList.map(elem => {
                 println(elem._1)
-                
+
                 elem._2.map(commit => {
                   val newFiles = commit.listNewFiles.map(file => "   " + file).mkString("\n")
 
-                  val deletions = commit.listDifferences.toList.map(file => (file._1, file._2.filter(e => e.charAt(0) == '-'))).filter(elem => elem._2.nonEmpty)
-                  val additions = commit.listDifferences.toList.map(file => (file._1, file._2.filter(e => e.charAt(0) == '+'))).filter(elem => elem._2.nonEmpty)
+                  val deletions = commit.listDifferences.toList.map(file => (file._1, file._2.filter(e => e.charAt(0) == '-'))).filter(elem => elem._2.nonEmpty) //for each file, we generate its deletions
+                  val additions = commit.listDifferences.toList.map(file => (file._1, file._2.filter(e => e.charAt(0) == '+'))).filter(elem => elem._2.nonEmpty) //same with additions
 
-                  val deletionsRed = deletions.map(file => (file._1, file._2.map(deletion => s"${Console.RED}" + deletion + Console.RESET))).toList
-                  val additionsGreen = additions.map(file => (file._1, file._2.map(addition => s"${Console.GREEN}" + addition + Console.RESET))).toList
+                  val deletionsRed = deletions.map(file => (file._1, file._2.map(deletion => s"${Console.RED}" + deletion + Console.RESET)))
+                  val additionsGreen = additions.map(file => (file._1, file._2.map(addition => s"${Console.GREEN}" + addition + Console.RESET)))
 
                   val listDiffs = (deletionsRed ++ additionsGreen).groupBy(file => file._1)
 
                   val differences = listDiffs.toList.map(elem => (elem._1, elem._2.flatMap(e => e._2)))
-
                   val differencesString = differences.map(file => "   " + file._1 + "\n" + file._2.map(elem => "     " + elem).mkString("\n")).mkString("\n")
-
 
                   println(
                     s"${Console.YELLOW}  commit " +
@@ -167,10 +165,13 @@ object Parser extends App {
                   s"${Console.GREEN}" + list.filter(elem => elem.charAt(0) == '+').map(elem => elem.charAt(0)).mkString("") + Console.RESET + s"${Console.RED}" +list.filter(elem => elem.charAt(0) == '-').map(elem => elem.charAt(0)).mkString("") + Console.RESET
                 }
 
-
                 elem._2.map(commit => {
-                  val nbDifferences = commit.listDifferences.toList.map(elem => "  " + elem._1 + " | " + elem._2.length + " " + plusMinus(elem._2))
-                  val newEmptyFiles = commit.listNewFiles.filter(elem => !commit.listDifferences.keys.toList.contains(elem))
+                  val differentFiles = commit.listDifferences.toList.map(elem => "  " + elem._1 + " | " + elem._2.length + " " + plusMinus(elem._2))
+                  val newEmptyFiles = commit.listNewFiles.diff(commit.listDifferences.keys.toList)
+
+                  val nbFilesChanged = newEmptyFiles.length + differentFiles.length
+                  val nbInsertions = differentFiles.flatten.count(elem => elem == '+')
+                  val nbDeletions = differentFiles.flatten.count(elem => elem == '-')
 
                   println(
                     s"${Console.YELLOW}  commit " +
@@ -178,8 +179,8 @@ object Parser extends App {
                       " (" + elem._1 + ")" + "\n" +
                       "  Date:  " + commit.date + "\n" +
                       newEmptyFiles.map(elem => "  " + elem + " | 0").mkString("\n") + "\n" +
-                      nbDifferences.mkString("\n") + "\n"
-
+                      differentFiles.mkString("\n") + "\n" +
+                      "  " + nbFilesChanged + " file(s) changed, " + nbInsertions + " insertion(s)(+), " + nbDeletions + " deletion(s)(-)" + "\n"
                   )
                 })
               })
