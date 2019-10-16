@@ -55,27 +55,28 @@ object Log {
   private def diffCommits(rootPath: String, commit1: String, commit2: String): Map[String, List[String]] = {
     if (commit1 == "None") { //Initial commit
       val commitFilesContent2 = recreateTree(rootPath, commit2).map(file => (file.split(" ")(2), getContentFile(rootPath + File.separator + ".sgit" + File.separator + "Blobs" + File.separator + file.split(" ")(1)))).toMap
-      commitFilesContent2.map(elem => (elem._1, elem._2.split("\n").map(difference => "+ " + difference).toList))
+      commitFilesContent2.filter(elem => elem._2 != "").map(elem => (elem._1, elem._2.split("\n").map(difference => "+ " + difference).toList))
     }
-
     else {
       val commitFilesContent1 = recreateTree(rootPath, commit1).map(file => (file.split(" ")(2), getContentFile(rootPath + File.separator + ".sgit" + File.separator + "Blobs" + File.separator + file.split(" ")(1)))).toMap
       val commitFilesContent2 = recreateTree(rootPath, commit2).map(file => (file.split(" ")(2), getContentFile(rootPath + File.separator + ".sgit" + File.separator + "Blobs" + File.separator + file.split(" ")(1)))).toMap
 
       //Those who are in commitFilesContent2 but not in commitFilesContent1
-      val newFiles = commitFilesContent2.filter(elem => !commitFilesContent1.keys.toList.contains(elem._1))
+      val filesNew = commitFilesContent2.filter(elem => !commitFilesContent1.keys.toList.contains(elem._1)).filter(elem => elem._2 != "") //we get the new files not empty
+      val newFilesAdditions = filesNew.toList.map(elem => (elem._1, elem._2.split("\n").map(add => "+ " + add).toList)) //as it is new files, we have only +
 
-      val diffFiles = commitFilesContent2.filter(elem => !newFiles.keys.toList.contains(elem._1))
+      val diffFiles = commitFilesContent2.filter(elem => !newFiles(rootPath, commit1, commit2).contains(elem._1))
 
-      diffFiles.map(elem => {
+      val diffFilesAdditionsDeletions = diffFiles.toList.map(elem => {
         val file = elem._1
         val content1 = commitFilesContent1.getOrElse(file, "").split("\n").toList
         val content2 = elem._2.split("\n").toList
         val matrix = mostLargestCommonSubSetMatrix(content1, content2, 0, 0, Map())
         val listDifferences = getDifferences(content1, content2, content1.length - 1, content2.length - 1, matrix, List())
-
         (file, listDifferences)
       })
+
+      (diffFilesAdditionsDeletions ++ newFilesAdditions).filter(elem => elem._2.nonEmpty).toMap
     }
 
   }
