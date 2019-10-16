@@ -1,9 +1,10 @@
 package parser
 
-import java.io.File
-
 case class Config(
                    mode: String = "",
                    path: String = "",
-                   files: Seq[File] = Seq()
+                   files: List[String] = List(),
+                   arg: String = "",
+                   patch: Boolean = false,
+                   stat: Boolean = false,
                  )

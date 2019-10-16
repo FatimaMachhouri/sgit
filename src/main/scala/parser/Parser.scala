@@ -1,8 +1,7 @@
 package parser
 
 import java.io.File
-
-import command.{Add, Commit, Diff, Init, Status}
+import command.{Add, Commit, Diff, Init, Log, Status}
 import entities.Repository
 import scopt.OParser
 import utils.Path
@@ -19,7 +18,7 @@ object Parser extends App {
         .text("Here : How to use sgit"),
       cmd("init")
         .action((_, c) => c.copy(mode = "init"))
-        .text("Creates a .sgit directory in the current directory.")
+        .text("Creates a .sgit directory in the current directory. If the directory is already a sgit repository, does nothing.")
         .children(
           arg[String]("<path>")
             .optional()
@@ -29,7 +28,7 @@ object Parser extends App {
         .action((_, c) => c.copy(mode = "add"))
         .text("Stages the files.")
         .children(
-          arg[File]("<file>...")
+          arg[String]("<file>...")
             .unbounded()
             .required()
             .action((x, c) => c.copy(files = c.files :+ x))
@@ -43,7 +42,18 @@ object Parser extends App {
         .text("Status"),
       cmd("diff")
         .action((_, c) => c.copy(mode = "diff"))
-        .text("Diff")
+        .text("Diff"),
+      cmd("log")
+        .action((_, c) => c.copy(mode = "log"))
+        .text("Log")
+        .children(
+          opt[Unit]('p', "patch")
+            .text("Log -p")
+            .action((_, c) => c.copy(patch = true)),
+          opt[Unit]("stat")
+            .text("Log --stat")
+            .action((_, c) => c.copy(stat = true))
+        ),
     )
   }
 
@@ -53,14 +63,15 @@ object Parser extends App {
       config.mode match {
         case "init" => {
           val currentPath = new File(".").getCanonicalPath
-          if (args.length == 1) Init.init("") else Init.init(currentPath + File.separator + args(1))
+          val isInitialized = Init.init(currentPath + File.separator + config.path)
+          if (isInitialized) println("Initialized an empty sgit repository") else println("You are already in a sgit repository.")
         }
 
         case "add" => {
-          if (Repository.isASgitRepository()) {
-            val rootPath = Path.sgitParentPath()
-            val currentPath = new File(".").getCanonicalPath
-            Add.add(rootPath, currentPath, args.tail.toList)
+          val currentPath = new File(".").getCanonicalPath
+          if (Repository.isASgitRepository(currentPath)) {
+            val rootPath = Path.sgitParentPath(currentPath)
+            Add.add(rootPath, currentPath, config.files)
           }
           else {
             println("You can't run this command, you are not in a sgit repository. Please run sgit init.")
@@ -68,8 +79,9 @@ object Parser extends App {
         }
 
         case "commit" => {
-          if (Repository.isASgitRepository()) {
-            val rootPath = Path.sgitParentPath()
+          val currentPath = new File(".").getCanonicalPath
+          if (Repository.isASgitRepository(currentPath)) {
+            val rootPath = Path.sgitParentPath(currentPath)
             Commit.commit(rootPath)
           }
           else {
@@ -78,8 +90,9 @@ object Parser extends App {
         }
 
         case "status" => {
-          if (Repository.isASgitRepository()) {
-            val rootPath = Path.sgitParentPath()
+          val currentPath = new File(".").getCanonicalPath
+          if (Repository.isASgitRepository(currentPath)) {
+            val rootPath = Path.sgitParentPath(currentPath)
             println(Status.status(rootPath))
           }
           else {
@@ -88,10 +101,68 @@ object Parser extends App {
         }
 
         case "diff" => {
-          if (Repository.isASgitRepository()) {
-            val rootPath = Path.sgitParentPath()
+          val currentPath = new File(".").getCanonicalPath
+          if (Repository.isASgitRepository(currentPath)) {
+            val rootPath = Path.sgitParentPath(currentPath)
             val listPathsDifferences = Diff.diff(rootPath)
             println(Diff.prettyFormat(listPathsDifferences, ""))
+          }
+          else {
+            println("You can't run this command, you are not in a sgit repository. Please run sgit init.")
+          }
+        }
+
+        case "log" => {
+          val currentPath = new File(".").getCanonicalPath
+          if (Repository.isASgitRepository(currentPath)) {
+            val rootPath = Path.sgitParentPath(currentPath)
+            val logs = Log.listCommits(rootPath)
+
+            if (!config.patch && !config.stat) { //sgit log
+              logs.toList.map(elem => {
+                println(elem._1) //branchName
+                elem._2.map(commit => println(
+                  s"${Console.YELLOW}  commit " + commit.commitHash + Console.RESET + " (" + elem._1 + ")" + "\n" + "  Date:  " + commit.date + "\n")
+                )
+              })
+            }
+
+            else if (config.patch) { //sgit log -p
+              logs.toList.map(elem => {
+                println(elem._1)
+                
+                elem._2.map(commit => {
+                  val newFiles = commit.listNewFiles.map(file => "   " + file).mkString("\n")
+
+                  val deletions = commit.listDifferences.toList.map(file => (file._1, file._2.filter(e => e.charAt(0) == '-'))).filter(elem => elem._2.nonEmpty)
+                  val additions = commit.listDifferences.toList.map(file => (file._1, file._2.filter(e => e.charAt(0) == '+'))).filter(elem => elem._2.nonEmpty)
+
+                  val deletionsRed = deletions.map(file => (file._1, file._2.map(deletion => s"${Console.RED}" + deletion + Console.RESET))).toList
+                  val additionsGreen = additions.map(file => (file._1, file._2.map(addition => s"${Console.GREEN}" + addition + Console.RESET))).toList
+
+                  val listDiffs = (deletionsRed ++ additionsGreen).groupBy(file => file._1)
+
+                  val differences = listDiffs.toList.map(elem => (elem._1, elem._2.flatMap(e => e._2)))
+
+                  val differencesString = differences.map(file => "   " + file._1 + "\n" + file._2.map(elem => "     " + elem).mkString("\n")).mkString("\n")
+
+
+                  println(
+                    s"${Console.YELLOW}  commit " +
+                    commit.commitHash + Console.RESET +
+                    " ("+ elem._1 + ")" + "\n" +
+                    "  Date:  " + commit.date + "\n" +
+                    "  new files :\n" + newFiles + "\n" +
+                    "  diff :\n" + differencesString + "\n"
+                  )
+                })
+              })
+            }
+
+            else if (config.stat) { //sgit log --stat
+              println("sgitlog2")
+            }
+
           }
           else {
             println("You can't run this command, you are not in a sgit repository. Please run sgit init.")
