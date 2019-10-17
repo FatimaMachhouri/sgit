@@ -36,9 +36,11 @@ object BranchTag {
    *
    * @param rootPath
    * @return List[String]
+   * Returns branches with their last commit in the format : Branch LastCommitHash
    */
   def listBranches(rootPath: String): List[String] = {
-    getFilesDirectory(rootPath + File.separator + "Branches")
+    val branchesNames = getFilesDirectory(rootPath + File.separator + ".sgit" + File.separator + "Branches").map(elem => elem.replace(rootPath + File.separator + ".sgit" + File.separator + "Branches" + File.separator, ""))
+    branchesNames.map(branch => branch + " " + getContentFile(rootPath + File.separator + ".sgit" + File.separator + "Branches" + File.separator + branch))
   }
 
 
@@ -46,9 +48,11 @@ object BranchTag {
    *
    * @param rootPath
    * @return List[String]
+   * Returns tags in the format : Tag CommitHash
    */
   def listTags(rootPath: String): List[String] = {
-    getFilesDirectory(rootPath + File.separator + "Tags")
+    val tagsNames = getFilesDirectory(rootPath + File.separator + ".sgit" + File.separator + "Tags").map(elem => elem.replace(rootPath + File.separator + ".sgit" + File.separator + "Tags" + File.separator, ""))
+    tagsNames.map(tag => tag + " " + getContentFile(rootPath + File.separator + ".sgit" + File.separator + "Tags" + File.separator + tag))
   }
 
 }
