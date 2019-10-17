@@ -52,7 +52,7 @@ object Log {
    * Returns a map which contains for each file, the differences between 2 commits : the key is the file path and the value is the list of differences
    * If no differences, file -> List()
    */
-  private def diffCommits(rootPath: String, commit1: String, commit2: String): Map[String, List[String]] = {
+  def diffCommits(rootPath: String, commit1: String, commit2: String): Map[String, List[String]] = {
     if (commit1 == "None") { //Initial commit
       val commitFilesContent2 = recreateTree(rootPath, commit2).map(file => (file.split(" ")(2), getContentFile(rootPath + File.separator + ".sgit" + File.separator + "Blobs" + File.separator + file.split(" ")(1)))).toMap
       commitFilesContent2.filter(elem => elem._2 != "").map(elem => (elem._1, elem._2.split("\n").map(difference => "+ " + difference).toList))
@@ -90,7 +90,7 @@ object Log {
    * @return List[String]
    * Given 2 commits, returns the new files created (present in the commit2 but not in the commit1)
    */
-  private def newFiles(rootPath: String, commit1: String, commit2: String): List[String] = {
+  def newFiles(rootPath: String, commit1: String, commit2: String): List[String] = {
     if (commit1 == "None") recreateTree(rootPath, commit2).map(file => file.split(" ")(2)) //Initial commit
     else {
       val commitFiles1 = recreateTree(rootPath, commit1).map(file => (file.split(" ")(2)))
