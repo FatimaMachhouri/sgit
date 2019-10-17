@@ -15,4 +15,11 @@ import sbtassembly.AssemblyPlugin.defaultUniversalScript
 assemblyOption in assembly := (assemblyOption in assembly).value.copy(prependShellScript = Some(defaultUniversalScript(shebang = false)))
 assemblyJarName in assembly := s"${name.value}"
 
+import sbtsonar.SonarPlugin.autoImport.sonarProperties
+sonarProperties ++= Map(
+  "sonar.host.url" -> "http://localhost:9000",
+  "sonar.sources" -> "src/main/scala",
+  "sonar.tests" -> "src/test/scala"
+)
+
 parallelExecution in Test := false
