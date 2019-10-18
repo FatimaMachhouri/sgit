@@ -4,7 +4,8 @@ import command.{Add, Commit, Init, Status}
 import scala.reflect.io.Directory
 import java.io.File
 
-import utils.FileIO.{createDirectory, createFile, writeInFile, getContentFile}
+import utils.FileIO.{createDirectory, createFile, getContentFile, writeInFile}
+import utils.Path.getFilesDirectory
 
 
 class StatusTest extends FlatSpec with BeforeAndAfter {
@@ -32,7 +33,10 @@ class StatusTest extends FlatSpec with BeforeAndAfter {
 
     Add.add(statusTestDirectory, statusTestDirectory, List(statusTestDirectory + File.separator + "test.txt")) //test.txt is tracked
 
-    assert(Status.getUntrackedFiles(statusTestDirectory).diff(List("test1.txt", "test2.txt")).isEmpty)
+    val stageContent = getContentFile(statusTestDirectory + File.separator + ".sgit" + File.separator + "STAGE")
+    val filesInCurrentDirectory = getFilesDirectory(statusTestDirectory)
+
+    assert(Status.getUntrackedFiles(statusTestDirectory, stageContent, filesInCurrentDirectory).diff(List("test1.txt", "test2.txt")).isEmpty)
   }
 
 
@@ -42,7 +46,10 @@ class StatusTest extends FlatSpec with BeforeAndAfter {
     Add.add(statusTestDirectory, statusTestDirectory, List(statusTestDirectory + File.separator + "test.txt"))
     writeInFile(statusTestDirectory + File.separator + "test.txt", "test")
 
-    assert(Status.getModifiedFiles(statusTestDirectory) === Array("test.txt"))
+    val stageContent = getContentFile(statusTestDirectory + File.separator + ".sgit" + File.separator + "STAGE")
+    val filesInCurrentDirectory = getFilesDirectory(statusTestDirectory)
+
+    assert(Status.getModifiedFiles(statusTestDirectory, stageContent, filesInCurrentDirectory) === Array("test.txt"))
   }
 
 
@@ -56,7 +63,10 @@ class StatusTest extends FlatSpec with BeforeAndAfter {
 
     Add.add(statusTestDirectory, statusTestDirectory, List(statusTestDirectory + File.separator + "test2.txt"))
 
-    assert(Status.getChangesToBeCommitted(statusTestDirectory) === Array("new file:   test2.txt"))
+    val stageContent = getContentFile(statusTestDirectory + File.separator + ".sgit" + File.separator + "STAGE")
+    val commitStageContent = getContentFile(statusTestDirectory + File.separator + ".sgit" + File.separator + "STAGECOMMIT")
+
+    assert(Status.getChangesToBeCommitted(statusTestDirectory, stageContent, commitStageContent) === Array("new file:   test2.txt"))
   }
 
 
@@ -71,8 +81,10 @@ class StatusTest extends FlatSpec with BeforeAndAfter {
     writeInFile(statusTestDirectory + File.separator + "test1.txt", "test")
     Add.add(statusTestDirectory, statusTestDirectory, List(statusTestDirectory + File.separator + "test1.txt"))
 
+    val stageContent = getContentFile(statusTestDirectory + File.separator + ".sgit" + File.separator + "STAGE")
+    val commitStageContent = getContentFile(statusTestDirectory + File.separator + ".sgit" + File.separator + "STAGECOMMIT")
 
-    assert(Status.getChangesToBeCommitted(statusTestDirectory) === Array("modified:   test1.txt"))
+    assert(Status.getChangesToBeCommitted(statusTestDirectory, stageContent, commitStageContent) === Array("modified:   test1.txt"))
   }
 
 
