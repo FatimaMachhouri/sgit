@@ -22,7 +22,7 @@ object Diff {
     val filesInCurrentDirectory = getFilesDirectory(rootPath)
     val stageContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGE")
     val listHashAndFilesDirectory = filesInCurrentDirectory.map(file => List(encryptThisString(getContentFile(file)), file.replace(rootPath + File.separator, "")))
-    val modifiedFiles = getModifiedFiles(rootPath, filesInCurrentDirectory, stageContent, listHashAndFilesDirectory)
+    val modifiedFiles = getModifiedFiles(rootPath, stageContent, filesInCurrentDirectory, listHashAndFilesDirectory)
 
     if (modifiedFiles.isEmpty) Map()
     else {
