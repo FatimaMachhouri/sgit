@@ -1,10 +1,8 @@
 import org.scalatest.{BeforeAndAfter, FlatSpec}
 import command.{Add, Commit, Init, Status}
-
 import scala.reflect.io.Directory
 import java.io.File
-
-import utils.FileIO.{createDirectory, createFile, getContentFile, writeInFile}
+import utils.FileIO.{createDirectory, createFile, getContentFile, getCurrentBranch, writeInFile}
 import utils.Path.getFilesDirectory
 
 
@@ -49,7 +47,7 @@ class StatusTest extends FlatSpec with BeforeAndAfter {
     val stageContent = getContentFile(statusTestDirectory + File.separator + ".sgit" + File.separator + "STAGE")
     val filesInCurrentDirectory = getFilesDirectory(statusTestDirectory)
 
-    assert(Status.getModifiedFiles(statusTestDirectory, stageContent, filesInCurrentDirectory) === Array("test.txt"))
+    assert(Status.getModifiedFiles(statusTestDirectory, stageContent, filesInCurrentDirectory).equals(List("test.txt")))
   }
 
 
@@ -66,7 +64,7 @@ class StatusTest extends FlatSpec with BeforeAndAfter {
     val stageContent = getContentFile(statusTestDirectory + File.separator + ".sgit" + File.separator + "STAGE")
     val commitStageContent = getContentFile(statusTestDirectory + File.separator + ".sgit" + File.separator + "STAGECOMMIT")
 
-    assert(Status.getChangesToBeCommitted(statusTestDirectory, stageContent, commitStageContent) === Array("new file:   test2.txt"))
+    assert(Status.getChangesToBeCommitted(statusTestDirectory, stageContent, commitStageContent).equals(List("new file:   test2.txt")))
   }
 
 
@@ -84,13 +82,13 @@ class StatusTest extends FlatSpec with BeforeAndAfter {
     val stageContent = getContentFile(statusTestDirectory + File.separator + ".sgit" + File.separator + "STAGE")
     val commitStageContent = getContentFile(statusTestDirectory + File.separator + ".sgit" + File.separator + "STAGECOMMIT")
 
-    assert(Status.getChangesToBeCommitted(statusTestDirectory, stageContent, commitStageContent) === Array("modified:   test1.txt"))
+    assert(Status.getChangesToBeCommitted(statusTestDirectory, stageContent, commitStageContent).equals(List("modified:   test1.txt")))
   }
 
 
   it should "return the current branch" in {
     val statusTestDirectory = new File(".").getCanonicalPath + File.separator + "StatusDirectoryTest"
-    assert(getContentFile(statusTestDirectory + File.separator + ".sgit" + File.separator + "HEAD") == "master")
+    assert(getCurrentBranch(statusTestDirectory).equals("master"))
   }
 
 }

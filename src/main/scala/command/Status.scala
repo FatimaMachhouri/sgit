@@ -50,9 +50,14 @@ object Status {
   }
 
 
+  /**
+   *
+   * @param stringsToPrint
+   * @return String
+   */
   def prettyPrint(stringsToPrint: List[String]): String = {
-    if (stringsToPrint.length == 0) ""
-    else if (stringsToPrint.head != "") stringsToPrint.head + "\n\n" + prettyPrint(stringsToPrint.tail)
+    if (stringsToPrint.isEmpty) ""
+    else if (stringsToPrint.head.nonEmpty) stringsToPrint.head + "\n\n" + prettyPrint(stringsToPrint.tail)
     else prettyPrint(stringsToPrint.tail)
   }
 
@@ -60,13 +65,15 @@ object Status {
   /**
    *
    * @param rootPath
-   * @return a string
+   * @param stageContent
+   * @param filesInCurrentDirectory
+   * @return List[String]
    * Returns untracked files ie files present in the directory but not in the stage file
    */
   def getUntrackedFiles(rootPath: String, stageContent: String, filesInCurrentDirectory: List[String]): List[String] = {
     val filesInCurrentDirectoryTab = filesInCurrentDirectory.map(elem => elem.replace(rootPath + File.separator, ""))
 
-    if (stageContent == "") filesInCurrentDirectoryTab
+    if (stageContent.isEmpty) filesInCurrentDirectoryTab
     else {
       val stagedFiles = {
         val stageContentTab = stageContent.split("\n")
@@ -79,35 +86,39 @@ object Status {
 
   /**
    *
-   * @param rootPath string
-   * @return an array of string
+   * @param rootPath String
+   * @param stageContent String
+   * @param filesInCurrentDirectory List[String]
+   * @return List[String]
    * Returns modified files ie files present in the stage file and in the directory but having different hash
    */
-  def getModifiedFiles(rootPath: String, stageContent: String, filesInCurrentDirectory: List[String]): Array[String] = {
+  def getModifiedFiles(rootPath: String, stageContent: String, filesInCurrentDirectory: List[String]): List[String] = {
     val listHashAndFilesDirectory = filesInCurrentDirectory.map(file => List(encryptThisString(getContentFile(file)), file.replace(rootPath + File.separator, "")))
 
     val stageContentTab = stageContent.split("\n")
 
-    if (stageContent == "") Array()
+    if (stageContent.isEmpty) List()
     else {
       val listHashAndFilesStage = stageContentTab.map(elem => List(elem.split(" ")(1), elem.split(" ")(2)))
-      listHashAndFilesStage.diff(listHashAndFilesDirectory).map(elem => elem(1)).distinct
+      listHashAndFilesStage.diff(listHashAndFilesDirectory).map(elem => elem(1)).distinct.toList
     }
   }
 
 
   /**
    *
-   * @param rootPath
-   * @return an array of string
+   * @param rootPath String
+   * @param stageContent String
+   * @param commitStageContent String
+   * @return List[String]
    * Returns the staged files which are not in the last commit and the modified files (different between the stage and the last commit)
    */
-  def getChangesToBeCommitted(rootPath: String, stageContent: String, commitStageContent: String): Array[String] = {
+  def getChangesToBeCommitted(rootPath: String, stageContent: String, commitStageContent: String): List[String] = {
     val stageContentTab = stageContent.split("\n")
     val lastCommitStageTab = commitStageContent.split("\n")
 
-    if (stageContent == "") Array()
-    else if (commitStageContent == "") stageContentTab.map(elem => "new file:   " + elem.split(" ")(2))
+    if (stageContent.isEmpty) List()
+    else if (commitStageContent.isEmpty) stageContentTab.map(elem => "new file:   " + elem.split(" ")(2)).toList
     else {
       //We get the new files
       val filesStage = stageContentTab.map(elem => elem.split(" ")(2))
@@ -120,7 +131,7 @@ object Status {
       val modifiedFiles = newAndModifiedFiles.diff(newFiles)
       val modifiedFilesFormat = modifiedFiles.map(file => "modified:   " + file)
 
-      modifiedFilesFormat ++ newFilesFormat
+      (modifiedFilesFormat ++ newFilesFormat).toList
     }
   }
 
