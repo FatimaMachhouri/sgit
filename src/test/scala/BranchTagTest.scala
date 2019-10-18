@@ -1,8 +1,7 @@
 import java.io.File
 
 import org.scalatest.{BeforeAndAfter, FlatSpec}
-import utils.FileIO.{createDirectory, createFile, getContentFile, writeInFile}
-
+import utils.FileIO.{createDirectory, createFile}
 import scala.reflect.io.Directory
 import command.{Add, BranchTag, Init, Commit}
 import utils.Path.getFilesDirectory
@@ -64,7 +63,7 @@ class BranchTagTest extends FlatSpec with BeforeAndAfter {
 
     BranchTag.createBranch(branchTagTestDirectory, "branchTest")
 
-    assert(getFilesDirectory(branchTagTestDirectory + File.separator + ".sgit" + File.separator + "Branches").length == 2)
+    assert(getFilesDirectory(branchTagTestDirectory + File.separator + ".sgit" + File.separator + "Branches").length.equals(2))
   }
 
 
@@ -76,7 +75,7 @@ class BranchTagTest extends FlatSpec with BeforeAndAfter {
 
     BranchTag.createTag(branchTagTestDirectory, "tagTest")
 
-    assert(getFilesDirectory(branchTagTestDirectory + File.separator + ".sgit" + File.separator + "Tags").length == 1)
+    assert(getFilesDirectory(branchTagTestDirectory + File.separator + ".sgit" + File.separator + "Tags").length.equals(1))
   }
 
 }
