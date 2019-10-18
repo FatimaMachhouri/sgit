@@ -16,8 +16,12 @@ object Status {
    */
   def status(rootPath: String): String = {
 
+    val stageContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGE")
+    val filesInCurrentDirectory = getFilesDirectory(rootPath)
+
     val changesToBeCommitted = {
-      val changes = getChangesToBeCommitted(rootPath)
+      val commitStageContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGECOMMIT")
+      val changes = getChangesToBeCommitted(rootPath, stageContent, commitStageContent)
       if (changes.isEmpty) ""
       else {
         "Changes to be committed:\n" +
@@ -26,7 +30,7 @@ object Status {
     }
 
     val modifiedFiles = {
-      val getModified = getModifiedFiles(rootPath)
+      val getModified = getModifiedFiles(rootPath, filesInCurrentDirectory, stageContent)
       if (getModified.isEmpty) ""
       else {
         "Changes not staged for commit\n" + "  (use 'sgit add <file>...' to update what will be committed)\n" +
@@ -35,7 +39,9 @@ object Status {
     }
 
     val untrackedFiles = {
-      val getUntracked = getUntrackedFiles(rootPath)
+      val filesInCurrentDirectoryFormat = filesInCurrentDirectory.map(elem => elem.replace(rootPath + File.separator, ""))
+
+      val getUntracked = getUntrackedFiles(rootPath, stageContent, filesInCurrentDirectoryFormat)
       if (getUntracked.isEmpty) ""
       else {
         "Untracked files:\n" + "  (use 'sgit add <file>...' to include in what will be committed)\n" +
@@ -43,24 +49,14 @@ object Status {
       }
     }
 
-
-    def prettyPrint(stringsToPrint: List[String]): String = {
-      if (stringsToPrint.length == 0) ""
-      else if (stringsToPrint.head != "") stringsToPrint.head + "\n\n" + prettyPrint(stringsToPrint.tail)
-      else prettyPrint(stringsToPrint.tail)
-    }
-
-    prettyPrint(List(getBranch(rootPath), changesToBeCommitted, modifiedFiles, untrackedFiles))
+    prettyPrint(List(getCurrentBranch(rootPath), changesToBeCommitted, modifiedFiles, untrackedFiles))
   }
 
 
-  /**
-   *
-   * @param rootPath
-   * @return a string
-   */
-  def getBranch(rootPath: String): String = {
-    "On branch " + getCurrentBranch(rootPath)
+  def prettyPrint(stringsToPrint: List[String]): String = {
+    if (stringsToPrint.length == 0) ""
+    else if (stringsToPrint.head != "") stringsToPrint.head + "\n\n" + prettyPrint(stringsToPrint.tail)
+    else prettyPrint(stringsToPrint.tail)
   }
 
 
@@ -70,10 +66,7 @@ object Status {
    * @return a string
    * Returns untracked files ie files present in the directory but not in the stage file
    */
-  def getUntrackedFiles(rootPath: String): List[String] = {
-    val filesInCurrentDirectory = getFilesDirectory(rootPath).map(elem => elem.replace(rootPath + File.separator, ""))
-    val stageContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGE")
-
+  def getUntrackedFiles(rootPath: String, stageContent: String, filesInCurrentDirectory: List[String]): List[String] = {
     if (stageContent == "") filesInCurrentDirectory
     else {
       val stagedFiles = {
@@ -91,11 +84,9 @@ object Status {
    * @return an array of string
    * Returns modified files ie files present in the stage file and in the directory but having different hash
    */
-  def getModifiedFiles(rootPath: String): Array[String] = {
-    val filesInCurrentDirectory = getFilesDirectory(rootPath)
+  def getModifiedFiles(rootPath: String, filesInCurrentDirectory: List[String], stageContent: String): Array[String] = {
     val listHashAndFilesDirectory = filesInCurrentDirectory.map(file => List(encryptThisString(getContentFile(file)), file.replace(rootPath + File.separator, "")))
 
-    val stageContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGE")
     val stageContentTab = stageContent.split("\n")
 
     if (stageContent == "") Array()
@@ -112,10 +103,7 @@ object Status {
    * @return an array of string
    * Returns the staged files which are not in the last commit and the modified files (different between the stage and the last commit)
    */
-  def getChangesToBeCommitted(rootPath: String): Array[String] = {
-    val stageContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGE")
-    val commitStageContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGECOMMIT")
-
+  def getChangesToBeCommitted(rootPath: String, stageContent: String, commitStageContent: String): Array[String] = {
     val stageContentTab = stageContent.split("\n")
     val lastCommitStageTab = commitStageContent.split("\n")
 
