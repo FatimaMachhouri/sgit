@@ -15,12 +15,11 @@ object Status {
    * Returns the status of the sgit repository : current branch, untracked files, tracked files not committed, files updated
    */
   def status(rootPath: String): String = {
-
     val stageContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGE")
+    val commitStageContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGECOMMIT")
     val filesInCurrentDirectory = getFilesDirectory(rootPath)
 
     val changesToBeCommitted = {
-      val commitStageContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGECOMMIT")
       val changes = getChangesToBeCommitted(rootPath, stageContent, commitStageContent)
       if (changes.isEmpty) ""
       else {
@@ -30,7 +29,7 @@ object Status {
     }
 
     val modifiedFiles = {
-      val getModified = getModifiedFiles(rootPath, filesInCurrentDirectory, stageContent)
+      val getModified = getModifiedFiles(rootPath, stageContent, filesInCurrentDirectory)
       if (getModified.isEmpty) ""
       else {
         "Changes not staged for commit\n" + "  (use 'sgit add <file>...' to update what will be committed)\n" +
@@ -39,9 +38,7 @@ object Status {
     }
 
     val untrackedFiles = {
-      val filesInCurrentDirectoryFormat = filesInCurrentDirectory.map(elem => elem.replace(rootPath + File.separator, ""))
-
-      val getUntracked = getUntrackedFiles(rootPath, stageContent, filesInCurrentDirectoryFormat)
+      val getUntracked = getUntrackedFiles(rootPath, stageContent, filesInCurrentDirectory)
       if (getUntracked.isEmpty) ""
       else {
         "Untracked files:\n" + "  (use 'sgit add <file>...' to include in what will be committed)\n" +
@@ -67,13 +64,15 @@ object Status {
    * Returns untracked files ie files present in the directory but not in the stage file
    */
   def getUntrackedFiles(rootPath: String, stageContent: String, filesInCurrentDirectory: List[String]): List[String] = {
-    if (stageContent == "") filesInCurrentDirectory
+    val filesInCurrentDirectoryTab = filesInCurrentDirectory.map(elem => elem.replace(rootPath + File.separator, ""))
+
+    if (stageContent == "") filesInCurrentDirectoryTab
     else {
       val stagedFiles = {
         val stageContentTab = stageContent.split("\n")
         stageContentTab.map(elem => elem.split(" ")(2))
       }
-      filesInCurrentDirectory.diff(stagedFiles.toList)
+      filesInCurrentDirectoryTab.diff(stagedFiles.toList)
     }
   }
 
@@ -84,7 +83,7 @@ object Status {
    * @return an array of string
    * Returns modified files ie files present in the stage file and in the directory but having different hash
    */
-  def getModifiedFiles(rootPath: String, filesInCurrentDirectory: List[String], stageContent: String): Array[String] = {
+  def getModifiedFiles(rootPath: String, stageContent: String, filesInCurrentDirectory: List[String]): Array[String] = {
     val listHashAndFilesDirectory = filesInCurrentDirectory.map(file => List(encryptThisString(getContentFile(file)), file.replace(rootPath + File.separator, "")))
 
     val stageContentTab = stageContent.split("\n")
