@@ -19,7 +19,10 @@ object Diff {
   def diff(rootPath: String): Map[String, List[String]] = {
 
     //Get paths of modified files
-    val modifiedFiles = getModifiedFiles(rootPath)
+    val filesInCurrentDirectory = getFilesDirectory(rootPath)
+    val stageContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGE")
+    val listHashAndFilesDirectory = filesInCurrentDirectory.map(file => List(encryptThisString(getContentFile(file)), file.replace(rootPath + File.separator, "")))
+    val modifiedFiles = getModifiedFiles(rootPath, stageContent, filesInCurrentDirectory, listHashAndFilesDirectory)
 
     if (modifiedFiles.isEmpty) Map()
     else {
@@ -128,15 +131,14 @@ object Diff {
 
   /**
    *
-   * @param rootPath string
+   * @param rootPath String
+   * @param stageContent String
+   * @param filesInCurrentDirectory List[String]
+   * @param listHashAndFilesDirectory List[List[String]]
    * @return an array of string
    * Returns modified files ie files present in the stage file and in the directory but having different hash
    */
-  private def getModifiedFiles(rootPath: String): Array[String] = {
-    val filesInCurrentDirectory = getFilesDirectory(rootPath)
-    val listHashAndFilesDirectory = filesInCurrentDirectory.map(file => List(encryptThisString(getContentFile(file)), file.replace(rootPath + File.separator, "")))
-
-    val stageContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGE")
+  private def getModifiedFiles(rootPath: String, stageContent: String, filesInCurrentDirectory: List[String], listHashAndFilesDirectory: List[List[String]]): Array[String] = {
     val stageContentTab = stageContent.split("\n")
 
     if (stageContent == "") Array()

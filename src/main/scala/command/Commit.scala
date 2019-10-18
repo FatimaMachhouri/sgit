@@ -15,7 +15,10 @@ object Commit {
   def commit(rootPath: String): Unit = {
 
     //Step 1 : We create all trees excepting the root tree
-    val rootTree = createSubTreesofRoot(rootPath)
+    //We get the stage content
+    val stage = rootPath + File.separator + ".sgit" + File.separator + "STAGE"
+    val stageContent = getContentFile(stage)
+    val rootTree = createSubTreesOfRoot(rootPath, stageContent)
 
     //Step 2 : We create the root tree
     val idRootTree = createRootTree(rootPath, rootTree)
@@ -66,11 +69,7 @@ object Commit {
    * @return a list of String
    * Creates the arborescence (except root tree) of the stage file.
    */
-  private def createSubTreesofRoot(rootPath: String): List[String] = {
-    //We get the stage content
-    val stage = rootPath + File.separator + ".sgit" + File.separator + "STAGE"
-    val stageContent = getContentFile(stage)
-
+  private def createSubTreesOfRoot(rootPath: String, stageContent: String): List[String] = {
     //We split in order to have each line of the stage file in a box. A line of the stage file has the form : Blob Hash Path
     val currentStage = stageContent.split("\n").toList
 

@@ -45,7 +45,9 @@ object Add {
       val newStageContent = {
         val relativePath = (currentPath + File.separator + formatFile).replace(rootPath + "/", "")
 
-        if (alreadyStaged(rootPath, currentPath, formatFile)) {
+        val contentStage = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGE")
+
+        if (alreadyStaged(rootPath, currentPath, contentStage, formatFile)) {
           val stageContentWithoutFile = stageContent.split("\n").filter(_.split(" ")(2) != relativePath)
           val newStage = Array("Blob " + cryptedContent + " " + relativePath) ++ stageContentWithoutFile
           newStage.mkString("\n")
@@ -65,9 +67,7 @@ object Add {
    * @return a boolean
    * Return true if the file is already in the stage else false
    */
-  private def alreadyStaged(rootPath: String, currentPath: String, file: String): Boolean = {
-    val path = rootPath + File.separator + ".sgit" + File.separator + "STAGE"
-    val stageContent = getContentFile(path)
+  private def alreadyStaged(rootPath: String, currentPath: String, stageContent: String, file: String): Boolean = {
     stageContent.contains((currentPath + File.separator + file).replace(rootPath + "/", ""))
   }
 
