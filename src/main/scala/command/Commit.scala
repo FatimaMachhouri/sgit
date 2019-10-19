@@ -69,6 +69,7 @@ object Commit {
    * @param stageContent String
    * @return List[String]
    * Creates the arborescence (except root tree) of the stage file.
+   * Returns the list of root tree children
    */
   private def createSubTreesOfRoot(rootPath: String, stageContent: String): List[String] = {
     //We split in order to have each line of the stage file in a box. A line of the stage file has the form : Blob Hash Path
@@ -100,7 +101,8 @@ object Commit {
       }
     }
 
-    commitTailRec(currentStage)
+    if (stageContent.isEmpty) List()
+    else commitTailRec(currentStage)
   }
 
 
