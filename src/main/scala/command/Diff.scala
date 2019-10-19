@@ -204,14 +204,9 @@ object Diff {
       val newIndex2 = if (index2 == list2.length) 0 else index2
 
       (newIndex1, newIndex2) match {
-        case (0, _) => { //If we are in the first line
+        case (0, _) | (_, 0) => { //If we are in the first line or first colum
           if (list1(newIndex1) == list2(newIndex2)) mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> 1))
-          else if (newIndex2 == 0) mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> 0))
-          else mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> acc.getOrElse((newIndex1, newIndex2 - 1), 0)))
-        }
-        case (_, 0) => { //If we are in the first column
-          if (list1(newIndex1) == list2(newIndex2)) mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> 1))
-          else if (newIndex1 == 0) mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> 0))
+          else if (newIndex1 == 0) mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> acc.getOrElse((newIndex1, newIndex2 - 1), 0)))
           else mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> acc.getOrElse((newIndex1 - 1, newIndex2), 0)))
         }
         case _ => { //Neither the first column nor the first line
