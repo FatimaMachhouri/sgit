@@ -22,7 +22,7 @@ object Diff {
     val filesInCurrentDirectory = getFilesDirectory(rootPath)
     val stageContent = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGE")
     val listHashAndFilesDirectory = filesInCurrentDirectory.map(file => List(encryptThisString(getContentFile(file)), file.replace(rootPath + File.separator, "")))
-    val modifiedFiles = getModifiedFiles(rootPath, stageContent, filesInCurrentDirectory, listHashAndFilesDirectory)
+    val modifiedFiles = getModifiedFiles(stageContent, listHashAndFilesDirectory)
 
     if (modifiedFiles.isEmpty) Map()
     else {
@@ -131,14 +131,12 @@ object Diff {
 
   /**
    *
-   * @param rootPath String
    * @param stageContent String
-   * @param filesInCurrentDirectory List[String]
    * @param listHashAndFilesDirectory List[List[String]]
    * @return an array of string
    * Returns modified files ie files present in the stage file and in the directory but having different hash
    */
-  private def getModifiedFiles(rootPath: String, stageContent: String, filesInCurrentDirectory: List[String], listHashAndFilesDirectory: List[List[String]]): Array[String] = {
+  private def getModifiedFiles(stageContent: String, listHashAndFilesDirectory: List[List[String]]): Array[String] = {
     val stageContentTab = stageContent.split("\n")
 
     if (stageContent == "") Array()
@@ -205,28 +203,26 @@ object Diff {
       val newIndex1 = if (index2 == list2.length) index1 + 1 else index1
       val newIndex2 = if (index2 == list2.length) 0 else index2
 
-      //If we are in the first line
-      if (newIndex1 == 0) {
-        if (list1(newIndex1) == list2(newIndex2)) mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> 1))
-        else if (newIndex2 == 0) mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> 0))
-        else mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> acc.getOrElse((newIndex1, newIndex2 - 1), 0)))
-      }
-
-      //If we are in the first column
-      else if (newIndex2 == 0) {
-        if (list1(newIndex1) == list2(newIndex2)) mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> 1))
-        else if (newIndex1 == 0) mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> 0))
-        else mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> acc.getOrElse((newIndex1 - 1, newIndex2), 0)))
-      }
-
-      else { //Neither the first column nor the first line
-        if (list1(newIndex1) == list2(newIndex2)) {
-          val newValue = acc.getOrElse((newIndex1 - 1, newIndex2 - 1), 0) + 1
-          mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> newValue))
+      (newIndex1, newIndex2) match {
+        case (0, _) => { //If we are in the first line
+          if (list1(newIndex1) == list2(newIndex2)) mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> 1))
+          else if (newIndex2 == 0) mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> 0))
+          else mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> acc.getOrElse((newIndex1, newIndex2 - 1), 0)))
         }
-        else {
-          val maxValue = Math.max(acc.getOrElse((newIndex1, newIndex2 - 1), 0), acc.getOrElse((newIndex1 - 1, newIndex2), 0))
-          mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> maxValue))
+        case (_, 0) => { //If we are in the first column
+          if (list1(newIndex1) == list2(newIndex2)) mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> 1))
+          else if (newIndex1 == 0) mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> 0))
+          else mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> acc.getOrElse((newIndex1 - 1, newIndex2), 0)))
+        }
+        case _ => { //Neither the first column nor the first line
+          if (list1(newIndex1) == list2(newIndex2)) {
+            val newValue = acc.getOrElse((newIndex1 - 1, newIndex2 - 1), 0) + 1
+            mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> newValue))
+          }
+          else {
+            val maxValue = Math.max(acc.getOrElse((newIndex1, newIndex2 - 1), 0), acc.getOrElse((newIndex1 - 1, newIndex2), 0))
+            mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> maxValue))
+          }
         }
       }
     }
