@@ -2,6 +2,7 @@
 
 ## Description
 The "sgit" project is a version-control tool (as git) written in Scala language programming. It is largely inspired by the git tool.
+This project contains also tests.
 
 ## How to install sgit
 
@@ -15,7 +16,7 @@ The "sgit" project is a version-control tool (as git) written in Scala language 
 
 
 ## Documentation
-*Find below the list of commands you can run*
+*Find below the list of commands you can run.*
 
 ### sgit init
 Permits to initialize a repository as a sgit repository.
