@@ -47,13 +47,18 @@ object Log {
    * @param logs Map[String, List[Commit]]
    * @return String
    */
-  def prettyFormatLog(logs: Map[String, List[Commit]]): Unit = {
-    logs.toList.map(elem => {
-      println(elem._1) //branchName
-      elem._2.map(commit => println(
-        s"${Console.YELLOW}  commit " + commit.commitHash + Console.RESET + " (" + elem._1 + ")" + "\n" + "  Date:  " + commit.date + "\n")
-      )
-    })
+  def prettyFormatLog(logs: Map[String, List[Commit]]): String = {
+
+    @tailrec
+    def prettyFormatLogTailRec(logs: Map[String, List[Commit]], acc: List[String]): String = {
+      if (logs.isEmpty) acc.mkString("\n")
+      else {
+        val commits = logs.head._2.map(commit => s"${Console.YELLOW}  commit " + commit.commitHash + Console.RESET + " (" + logs.head._1 + ")" + "\n" + "  Date:  " + commit.date + "\n")
+        prettyFormatLogTailRec(logs.tail, logs.head._1 + "\n" + commits.mkString("\n") :: acc)
+      }
+    }
+
+    prettyFormatLogTailRec(logs, List())
   }
 
 
@@ -62,34 +67,40 @@ object Log {
    * @param logs Map[String, List[Commit]]
    * @return String
    */
-  def prettyFormatLogP(logs: Map[String, List[Commit]]): Unit = {
-    logs.toList.map(elem => {
-      println(elem._1)
+  def prettyFormatLogP(logs: Map[String, List[Commit]]): String = {
 
-      elem._2.map(commit => {
-        val newFiles = commit.listNewFiles.map(file => "   " + file).mkString("\n")
+    @tailrec
+    def prettyFormatLogPTailRec(logs: Map[String, List[Commit]], acc: List[String]): String = {
+      if (logs.isEmpty) acc.mkString("\n")
+      else {
+        val commits = logs.head._2.map(commit => {
+          val newFiles = commit.listNewFiles.map(file => "   " + file).mkString("\n")
 
-        val deletions = commit.listDifferences.toList.map(file => (file._1, file._2.filter(e => e.charAt(0) == '-'))).filter(elem => elem._2.nonEmpty) //for each file, we generate its deletions
-        val additions = commit.listDifferences.toList.map(file => (file._1, file._2.filter(e => e.charAt(0) == '+'))).filter(elem => elem._2.nonEmpty) //same with additions
+          val deletions = commit.listDifferences.toList.map(file => (file._1, file._2.filter(e => e.charAt(0) == '-'))).filter(elem => elem._2.nonEmpty) //for each file, we generate its deletions
+          val additions = commit.listDifferences.toList.map(file => (file._1, file._2.filter(e => e.charAt(0) == '+'))).filter(elem => elem._2.nonEmpty) //same with additions
 
-        val deletionsRed = deletions.map(file => (file._1, file._2.map(deletion => s"${Console.RED}" + deletion + Console.RESET)))
-        val additionsGreen = additions.map(file => (file._1, file._2.map(addition => s"${Console.GREEN}" + addition + Console.RESET)))
+          val deletionsRed = deletions.map(file => (file._1, file._2.map(deletion => s"${Console.RED}" + deletion + Console.RESET)))
+          val additionsGreen = additions.map(file => (file._1, file._2.map(addition => s"${Console.GREEN}" + addition + Console.RESET)))
 
-        val listDiffs = (deletionsRed ++ additionsGreen).groupBy(file => file._1)
+          val listDiffs = (deletionsRed ++ additionsGreen).groupBy(file => file._1)
 
-        val differences = listDiffs.toList.map(elem => (elem._1, elem._2.flatMap(e => e._2)))
-        val differencesString = differences.map(file => "   " + file._1 + "\n" + file._2.map(elem => "     " + elem).mkString("\n")).mkString("\n")
+          val differences = listDiffs.toList.map(elem => (elem._1, elem._2.flatMap(e => e._2)))
+          val differencesString = differences.map(file => "   " + file._1 + "\n" + file._2.map(elem => "     " + elem).mkString("\n")).mkString("\n")
 
-        println(
-          s"${Console.YELLOW}  commit " +
-            commit.commitHash + Console.RESET +
-            " ("+ elem._1 + ")" + "\n" +
-            "  Date:  " + commit.date + "\n" +
-            "  new files :\n" + newFiles + "\n" +
-            "  diff :\n" + differencesString + "\n"
-        )
-      })
-    })
+            s"${Console.YELLOW}  commit " +
+              commit.commitHash + Console.RESET +
+              " ("+ logs.head._1 + ")" + "\n" +
+              "  Date:  " + commit.date + "\n" +
+              "  new files :\n" + newFiles + "\n" +
+              "  diff :\n" + differencesString + "\n"
+
+        })
+
+        prettyFormatLogPTailRec(logs.tail, logs.head._1 + "\n" + commits.mkString("\n") :: acc)
+      }
+    }
+
+    prettyFormatLogPTailRec(logs, List())
   }
 
 
