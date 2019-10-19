@@ -33,7 +33,7 @@ class BranchTagTest extends FlatSpec with BeforeAndAfter {
   }
 
 
-  "it" should "not create a new branch if number of commits == 0" in {
+  it should "not create a new branch if number of commits == 0" in {
     val branchTagTestDirectory = new File(".").getCanonicalPath + File.separator + "BranchTagDirectoryTest"
     assert(!BranchTag.createBranch(branchTagTestDirectory, "branchTest"))
   }
