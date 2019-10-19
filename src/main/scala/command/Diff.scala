@@ -136,7 +136,7 @@ object Diff {
    * @return an array of string
    * Returns modified files ie files present in the stage file and in the directory but having different hash
    */
-  private def getModifiedFiles(stageContent: String, listHashAndFilesDirectory: List[List[String]]): Array[String] = {
+  def getModifiedFiles(stageContent: String, listHashAndFilesDirectory: List[List[String]]): Array[String] = {
     val stageContentTab = stageContent.split("\n")
 
     if (stageContent == "") Array()
