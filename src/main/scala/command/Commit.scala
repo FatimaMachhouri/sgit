@@ -13,9 +13,6 @@ object Commit {
    * @param rootPath : String
    */
   def commit(rootPath: String): Unit = {
-
-    //SI INITIAL COMMIT AND STAGE VIDE
-
     //Step 1 : We create all trees excepting the root tree
     //We get the stage content
     val stage = rootPath + File.separator + ".sgit" + File.separator + "STAGE"
