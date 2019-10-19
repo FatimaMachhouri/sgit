@@ -145,9 +145,9 @@ object Parser extends App {
             val rootPath = Path.sgitParentPath(currentPath)
             val logs = Log.listCommits(rootPath)
 
-            if (!config.patch && !config.stat) Log.prettyFormatLog(logs)
-            else if (config.patch) Log.prettyFormatLogP(logs)
-            else if (config.stat) Log.prettyFormatLogStat(logs)
+            if (!config.patch && !config.stat) println(Log.prettyFormatLog(logs))
+            else if (config.patch) println(Log.prettyFormatLogP(logs))
+            else if (config.stat) println(Log.prettyFormatLogStat(logs))
 
           }
           else {
