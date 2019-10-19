@@ -145,73 +145,9 @@ object Parser extends App {
             val rootPath = Path.sgitParentPath(currentPath)
             val logs = Log.listCommits(rootPath)
 
-            if (!config.patch && !config.stat) { //sgit log
-              logs.toList.map(elem => {
-                println(elem._1) //branchName
-                elem._2.map(commit => println(
-                  s"${Console.YELLOW}  commit " + commit.commitHash + Console.RESET + " (" + elem._1 + ")" + "\n" + "  Date:  " + commit.date + "\n")
-                )
-              })
-            }
-
-            else if (config.patch) { //sgit log -p
-              logs.toList.map(elem => {
-                println(elem._1)
-
-                elem._2.map(commit => {
-                  val newFiles = commit.listNewFiles.map(file => "   " + file).mkString("\n")
-
-                  val deletions = commit.listDifferences.toList.map(file => (file._1, file._2.filter(e => e.charAt(0) == '-'))).filter(elem => elem._2.nonEmpty) //for each file, we generate its deletions
-                  val additions = commit.listDifferences.toList.map(file => (file._1, file._2.filter(e => e.charAt(0) == '+'))).filter(elem => elem._2.nonEmpty) //same with additions
-
-                  val deletionsRed = deletions.map(file => (file._1, file._2.map(deletion => s"${Console.RED}" + deletion + Console.RESET)))
-                  val additionsGreen = additions.map(file => (file._1, file._2.map(addition => s"${Console.GREEN}" + addition + Console.RESET)))
-
-                  val listDiffs = (deletionsRed ++ additionsGreen).groupBy(file => file._1)
-
-                  val differences = listDiffs.toList.map(elem => (elem._1, elem._2.flatMap(e => e._2)))
-                  val differencesString = differences.map(file => "   " + file._1 + "\n" + file._2.map(elem => "     " + elem).mkString("\n")).mkString("\n")
-
-                  println(
-                    s"${Console.YELLOW}  commit " +
-                    commit.commitHash + Console.RESET +
-                    " ("+ elem._1 + ")" + "\n" +
-                    "  Date:  " + commit.date + "\n" +
-                    "  new files :\n" + newFiles + "\n" +
-                    "  diff :\n" + differencesString + "\n"
-                  )
-                })
-              })
-            }
-
-            else if (config.stat) { //sgit log --stat
-              logs.toList.map(f = elem => {
-                println(elem._1)
-
-                def plusMinus(list: List[String]): String = {
-                  s"${Console.GREEN}" + list.filter(elem => elem.charAt(0) == '+').map(elem => elem.charAt(0)).mkString("") + Console.RESET + s"${Console.RED}" +list.filter(elem => elem.charAt(0) == '-').map(elem => elem.charAt(0)).mkString("") + Console.RESET
-                }
-
-                elem._2.map(commit => {
-                  val differentFiles = commit.listDifferences.toList.map(elem => "  " + elem._1 + " | " + elem._2.length + " " + plusMinus(elem._2))
-                  val newEmptyFiles = commit.listNewFiles.diff(commit.listDifferences.keys.toList)
-
-                  val nbFilesChanged = newEmptyFiles.length + differentFiles.length
-                  val nbInsertions = differentFiles.flatten.count(elem => elem == '+')
-                  val nbDeletions = differentFiles.flatten.count(elem => elem == '-')
-
-                  println(
-                    s"${Console.YELLOW}  commit " +
-                      commit.commitHash + Console.RESET +
-                      " (" + elem._1 + ")" + "\n" +
-                      "  Date:  " + commit.date + "\n" +
-                      newEmptyFiles.map(elem => "  " + elem + " | 0").mkString("\n") + "\n" +
-                      differentFiles.mkString("\n") + "\n" +
-                      "  " + nbFilesChanged + " file(s) changed, " + nbInsertions + " insertion(s)(+), " + nbDeletions + " deletion(s)(-)" + "\n"
-                  )
-                })
-              })
-            }
+            if (!config.patch && !config.stat) Log.prettyFormatLog(logs)
+            else if (config.patch) Log.prettyFormatLogP(logs)
+            else if (config.stat) Log.prettyFormatLogStat(logs)
 
           }
           else {
