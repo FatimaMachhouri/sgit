@@ -14,6 +14,8 @@ object Commit {
    */
   def commit(rootPath: String): Unit = {
 
+    //SI INITIAL COMMIT AND STAGE VIDE
+
     //Step 1 : We create all trees excepting the root tree
     //We get the stage content
     val stage = rootPath + File.separator + ".sgit" + File.separator + "STAGE"
@@ -66,7 +68,9 @@ object Commit {
 
   /**
    *
-   * @return a list of String
+   * @param rootPath String
+   * @param stageContent String
+   * @return List[String]
    * Creates the arborescence (except root tree) of the stage file.
    */
   private def createSubTreesOfRoot(rootPath: String, stageContent: String): List[String] = {
@@ -105,8 +109,8 @@ object Commit {
 
   /**
    *
-   * @param listPaths
-   * @return a list of string
+   * @param listPaths List[String]
+   * @return List[String]
    * Return the deespest paths of the list paramater ie those whose path is the longest
    */
   private def deepestPaths(listPaths: List[String]): List[String] = {
@@ -133,8 +137,8 @@ object Commit {
 
   /**
    *
-   * @param listPaths
-   * @return a list of trees
+   * @param listPaths List[String]
+   * @return List[Tree]
    * Takes in parameter path of the same length and merges path with the same root arborescence
    * merge(List("directory1/directory2/file1.txt", "directory1/directory2/file2.txt")) = Tree("directory1/directory2", List("file1.txt, file2.txt"))
    */
@@ -168,8 +172,8 @@ object Commit {
 
   /**
    *
-   * @param listPaths where an element of the list has the following format : "Type Hash Path"
-   * @return a boolean
+   * @param listPaths List[String] where an element of the list has the following format : "Type Hash Path"
+   * @return Boolean
    * Returns true if all parameter paths are root children ie have the format : "x" or "y.txt" where x and y are respectively directory and file name
    */
   private def areAllRootChildren(listPaths: List[String]): Boolean = {
