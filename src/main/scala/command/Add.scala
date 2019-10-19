@@ -13,6 +13,7 @@ object Add {
    * @param filePaths List[String]
    *
    * Creates a Blob File for each file of the list parameter in the currentPath/.sgit/Blobs with an encrypted name based on the SHA-1
+   * If the file was already in the stage, it is remplaced by its new hash
    */
   def add(rootPath: String, currentPath: String, filePaths: List[String]): Unit = {
     val pathBlobs = rootPath + File.separator + ".sgit" + File.separator + "Blobs"
@@ -45,11 +46,9 @@ object Add {
       val newStageContent = {
         val relativePath = (currentPath + File.separator + formatFile).replace(rootPath + "/", "")
 
-        val contentStage = getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGE")
-
-        if (alreadyStaged(rootPath, currentPath, contentStage, formatFile)) {
-          val stageContentWithoutFile = stageContent.split("\n").filter(_.split(" ")(2) != relativePath)
-          val newStage = Array("Blob " + cryptedContent + " " + relativePath) ++ stageContentWithoutFile
+        if (alreadyStaged(rootPath, currentPath, stageContent, formatFile)) {
+          val stageContentWithoutFile = stageContent.split("\n").filter(_.split(" ")(2) != relativePath).toList
+          val newStage = ("Blob " + cryptedContent + " " + relativePath) :: stageContentWithoutFile
           newStage.mkString("\n")
         }
         else if (stageContent == "") "Blob " + cryptedContent + " " + relativePath
@@ -61,10 +60,14 @@ object Add {
     })
   }
 
+
   /**
    *
-   * @param file
-   * @return a boolean
+   * @param rootPath String
+   * @param currentPath String
+   * @param stageContent String
+   * @param file String
+   * @return a Boolean
    * Return true if the file is already in the stage else false
    */
   private def alreadyStaged(rootPath: String, currentPath: String, stageContent: String, file: String): Boolean = {
