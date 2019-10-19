@@ -11,8 +11,10 @@ object Commit {
   /**
    *
    * @param rootPath : String
+   * @return String
+   * Returns the commit hash if the commit is created otherwise ""
    */
-  def commit(rootPath: String): Unit = {
+  def commit(rootPath: String): String = {
     //Step 1 : We create all trees excepting the root tree
     //We get the stage content
     val stage = rootPath + File.separator + ".sgit" + File.separator + "STAGE"
@@ -58,8 +60,10 @@ object Commit {
 
       //We update the stage file commit by copying the content of the stage
       writeInFile(rootPath + File.separator + ".sgit" + File.separator + "STAGECOMMIT", getContentFile(rootPath + File.separator + ".sgit" + File.separator + "STAGE"))
-    }
 
+      idCommit
+    }
+    else ""
   }
 
 
