@@ -85,4 +85,14 @@ class CommitTest extends FlatSpec with BeforeAndAfter {
     assert(getFilesDirectory(commitTestDirectory + File.separator + ".sgit" + File.separator + "Commits").length == 1)
   }
 
+
+  it should "create a commit which points towards an empty tree if the stage content is empty" in {
+    val commitTestDirectory = new File(".").getCanonicalPath + File.separator + "CommitDirectoryTest"
+
+    val commitHash = Commit.commit(commitTestDirectory)
+    val tree = getContentFile(commitTestDirectory + File.separator + ".sgit" + File.separator + "Commits" + File.separator + commitHash).split("\n")(1)
+    val contentTree = getContentFile(commitTestDirectory + File.separator + ".sgit" + File.separator + "Trees" + File.separator + tree)
+
+    assert(contentTree.isEmpty)
+  }
 }
