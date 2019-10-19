@@ -1,7 +1,7 @@
 # sgit
 
 ## Description
-The "sgit" project is a version-control tool (as git) written in Scala language programming. It is largely inspired by the git tool.
+The "sgit" project is a version-control tool written in Scala language programming. It is largely inspired by the git tool.
 This project contains also tests.
 
 ## How to install sgit
@@ -9,10 +9,10 @@ This project contains also tests.
 *Pre-requisite : Make sure you have sbt installed.*
 
 1. Clone this repository : `git clone https://github.com/FatimaMachhouri/sgit.git`
-2. `cd sgit`
-3. `sbt assembly`
+2. Go to the cloned repository : `cd sgit`
+3. Run the following command : `sbt assembly`
 4. Add this line in your bash file : `export PATH="path/sgit/target/scala-2.13/:$PATH"`. Replace path by the path to the cloned repository. 
-5. Refresh your bash file to take into account the changes
+5. Refresh your bash file to take into account the changes.
 
 
 ## Documentation
