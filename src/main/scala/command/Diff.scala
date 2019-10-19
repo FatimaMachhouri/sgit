@@ -162,9 +162,26 @@ object Diff {
    */
   @tailrec
   def getDifferences(text1: List[String], text2: List[String], index1: Int, index2: Int, matrix: Map[(Int, Int), Int], acc: List[String]): List[String] = {
-    val currentElem = matrix.getOrElse((index1, index2), -1)
-    val previousElemLine = matrix.getOrElse((index1, index2 - 1), 0)
-    val previousElemCol = matrix.getOrElse((index1 - 1, index2), 0)
+    val currentElem = {
+      matrix.get(index1, index2) match {
+        case Some(i) => i
+        case None => -1
+      }
+    }
+
+    val previousElemLine = {
+      matrix.get(index1, index2 - 1) match {
+        case Some(i) => i
+        case None => 0
+      }
+    }
+
+    val previousElemCol = {
+      matrix.get(index1 - 1, index2) match {
+        case Some(i) => i
+        case None => 0
+      }
+    }
 
     if (currentElem == -1) {
       if (index1 == -1 & index2 == -1) acc
@@ -193,32 +210,23 @@ object Diff {
    * Permits to build the matrix of the most largest common sub-set of the 2 lists.
    * Each elem of the list1 is put in line and each elem of the list2 is put in column.
    * The return map contains the list of (line index, column index) -> value associated in the matrix
+   * (Longest Common Subsequence Algorithm)
    */
   @tailrec
   def mostLargestCommonSubSetMatrix(list1: List[String], list2: List[String], index1: Int, index2: Int, acc: Map[(Int, Int), Int]): Map[(Int, Int), Int] = {
     //We stop when we go through the 2 lists
     if (list1.length - 1 <= index1 && list2.length <= index2) acc
-
     else {
       val newIndex1 = if (index2 == list2.length) index1 + 1 else index1
       val newIndex2 = if (index2 == list2.length) 0 else index2
 
-      (newIndex1, newIndex2) match {
-        case (0, _) | (_, 0) => { //If we are in the first line or first colum
-          if (list1(newIndex1) == list2(newIndex2)) mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> 1))
-          else if (newIndex1 == 0) mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> acc.getOrElse((newIndex1, newIndex2 - 1), 0)))
-          else mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> acc.getOrElse((newIndex1 - 1, newIndex2), 0)))
-        }
-        case _ => { //Neither the first column nor the first line
-          if (list1(newIndex1) == list2(newIndex2)) {
-            val newValue = acc.getOrElse((newIndex1 - 1, newIndex2 - 1), 0) + 1
-            mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> newValue))
-          }
-          else {
-            val maxValue = Math.max(acc.getOrElse((newIndex1, newIndex2 - 1), 0), acc.getOrElse((newIndex1 - 1, newIndex2), 0))
-            mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> maxValue))
-          }
-        }
+      if (list1(newIndex1) == list2(newIndex2)) {
+        val newValue = acc.getOrElse((newIndex1 - 1, newIndex2 - 1), 0) + 1
+        mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> newValue))
+      }
+      else {
+        val maxValue = Math.max(acc.getOrElse((newIndex1, newIndex2 - 1), 0), acc.getOrElse((newIndex1 - 1, newIndex2), 0))
+        mostLargestCommonSubSetMatrix(list1, list2, newIndex1, newIndex2 + 1, acc + ((newIndex1, newIndex2) -> maxValue))
       }
     }
   }
