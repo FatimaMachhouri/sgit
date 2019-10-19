@@ -14,8 +14,8 @@ object FileIO {
 
   /**
    *
-   * @param path string
-   * @return a boolean
+   * @param path String
+   * @return Boolean
    * Creates in the path parameter a file. Returns true if the file is created otherwise false.
    */
   def createFile(path: String): Boolean = {
@@ -26,8 +26,8 @@ object FileIO {
 
   /**
    *
-   * @param path string
-   * @return a boolean
+   * @param path String
+   * @return Boolean
    * Creates in the path parameter a directory. Returns true if the directory is created otherwise false.
    */
   def createDirectory(path: String): Boolean = {
@@ -38,8 +38,8 @@ object FileIO {
 
   /**
    *
-   * @param path
-   * @param content
+   * @param path String
+   * @param content String
    * Writes in the path parameter file the content parameter
    * Does nothing if the file doesn't exist
    */
@@ -56,8 +56,8 @@ object FileIO {
 
   /**
    *
-   * @param path
-   * @return a string
+   * @param path String
+   * @return String
    * Returns the content of the path file
    */
   def getContentFile(path: String): String = {
@@ -67,8 +67,8 @@ object FileIO {
 
   /**
    *
-   * @param listTrees
-   * @return a list of string
+   * @param listTrees List[Tree]
+   * @return List[String]
    */
   def createTrees(rootPath: String, listTrees: List[Tree]): List[String] = {
     //We get the path
@@ -89,8 +89,9 @@ object FileIO {
 
   /**
    *
-   * @param contentRoot a list of string
-   * @return a string
+   * @param rootPath String
+   * @param contentRoot List[String]
+   * @return String
    * Creates the root tree based on the list parameter and return the hash string of the root tree
    */
   def createRootTree(rootPath: String, contentRoot: List[String]): String = {
@@ -108,8 +109,9 @@ object FileIO {
 
   /**
    *
-   * @param commitTree
-   * @return a string
+   * @param rootPath String
+   * @param commitTree String
+   * @return String
    * Creates the commit file with its content (parent commit, tree, date). The name of the file is its content crypted
    * Returns the hash of the commit created.
    */
@@ -129,7 +131,8 @@ object FileIO {
 
   /**
    *
-   * @return a string
+   * @param rootPath String
+   * @return String
    * Returns the hash of the last commit
    */
   def getLastCommit(rootPath: String): String = {
@@ -147,7 +150,8 @@ object FileIO {
 
   /**
    *
-   * @return a string
+   * @param rootPath String
+   * @return String
    * Creates the current branch file and returns its path
    */
   def createBranchFile(rootPath: String): String = {
@@ -160,7 +164,8 @@ object FileIO {
 
   /**
    *
-   * @param commitId
+   * @param rootPath String
+   * @param commitId String
    * Write the commitId in the current branch file.
    * If the branch doesn't exists, it creates it and write the last commit id. Else, it replaces the last commit id.
    */
@@ -180,6 +185,7 @@ object FileIO {
 
   /**
    *
+   * @param rootPath String
    * @param idCommit
    * Writes in the log file of the current branch the current commit and its parent commit
    */
@@ -203,8 +209,8 @@ object FileIO {
 
   /**
    *
-   * @param rootPath
-   * @return a string
+   * @param rootPath String
+   * @return String
    */
   def getCurrentBranch(rootPath: String): String = {
     val headFilePath = rootPath + File.separator + ".sgit" + File.separator + "HEAD"
@@ -214,8 +220,8 @@ object FileIO {
 
   /**
    *
-   * @param rootPath
-   * @return
+   * @param rootPath String
+   * @return Boolean
    */
   def isADirectory(rootPath: String): Boolean = {
     new File(rootPath).isDirectory

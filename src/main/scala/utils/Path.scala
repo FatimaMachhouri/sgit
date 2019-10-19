@@ -1,16 +1,14 @@
 package utils
 
 import java.io.File
-
-import javax.swing.filechooser.FileNameExtensionFilter
-
 import scala.annotation.tailrec
 
 object Path {
 
   /**
    *
-   * @return a string
+   * @param path String
+   * @return String
    * Returns the parent directory of the .sgit directory ie the root directory
    * If the .sgit not found, returns an empty string ""
    */
@@ -32,7 +30,7 @@ object Path {
   /**
    *
    * @param path String
-   * @return a list of string
+   * @return List[String]
    * Returns all the content (files and sub-directories) of a directory
    */
   def getContentDirectory(path: String): List[String] = {
@@ -61,7 +59,7 @@ object Path {
   /**
    *
    * @param path String
-   * @return a list of string
+   * @return List[String]
    * Returns all the content files (and sub files) of a directory
    * Exclude the .sgit directory
    */

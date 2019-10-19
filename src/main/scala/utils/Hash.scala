@@ -7,8 +7,8 @@ object Hash {
 
   /**
    *
-   * @param input
-   * @return a string
+   * @param input String
+   * @return String
    *
    * Returns the input parameter encrypted by using the Secure Hash Algorithm 1 (SHA-1)
    */
