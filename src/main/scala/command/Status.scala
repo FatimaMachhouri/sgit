@@ -1,8 +1,8 @@
 package command
 
 import java.io.File
-//import utils.Path.getFilesDirectory
-//import utils.FileIO.{getContentFile, getCurrentBranch}
+import utils.Path.getFilesDirectory
+import utils.FileIO.{getContentFile, getCurrentBranch}
 import utils.Hash.encryptThisString
 
 object Status {
