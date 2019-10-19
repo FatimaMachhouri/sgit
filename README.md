@@ -1,9 +1,9 @@
 # sgit
 
-**Description** 
-The "sgit" project is a version-control tool (as git) written in Scala language programming.
+## Description
+The "sgit" project is a version-control tool (as git) written in Scala language programming. It is largely inspired by the git tool.
 
-**How to install sgit**
+## How to install sgit
 
 *Pre-requisite : Make sure you have sbt installed.*
 
@@ -14,20 +14,35 @@ The "sgit" project is a version-control tool (as git) written in Scala language 
 5. Refresh your bash file to take into account the changes
 
 
-**Documentation**
+## Documentation
 *Find below the list of commands you can run*
 
-***sgit init***
-***sgit add [list of files]***
-***sgit commit***
-***sgit status***
-***sgit diff***
-***sgit log***
-***sgit log -p***
-***sgit log --stat***
-***sgit branch [branchName]***
-***sgit tag [tagName]***
-***sgit branch***
-***sgit branch -a***
-***sgit branch -v***
-***sgit branch -av***
+### sgit init
+Permits to initialize a repository as a sgit repository.
+### sgit add [list of files]
+Permits to add to the stage the list of files parameter.
+### sgit commit
+Permits to commit the content of the stage.
+### sgit status
+Permits to show the state of the working tree (=working directory) : The untracked files, the modified files, the files to commit...
+### sgit diff
+Permits to show differences between what was added and the working tree.
+### sgit log
+Permits to list all commits.
+### sgit log -p
+Permits to show differences between commits.
+### sgit log --stat
+Permits to show stats about commits.
+### sgit branch [branchName]
+Permits to create a branch with the branchName parameter. The branch will be associated to the last commit.
+### sgit tag [tagName]
+Permits to create a tag with the tagName parameter. The tag will be associated to the last commit.
+### sgit branch
+Permits to list all branch names and tag names.
+### sgit branch -a
+Permits to list all branch names and tag names.
+### sgit branch -v
+Permits to list all branch names and tag names and the last commit associated to each of them.
+### sgit branch -av
+Permits to list all branch names and tag names and the last commit associated to each of them.
+
